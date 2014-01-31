@@ -25,8 +25,7 @@ case class TermVariable(v : String) extends Term {
 	}
 }
 
-//Probably not Any
-case class TermList(l: List[Any]) extends Term {
+case class TermList(l: List[Term]) extends Term {
   val list=l
 
   override def toString : String = {
@@ -84,5 +83,14 @@ case class TermPublicKey(seed: Term) extends Term {
 
   override def toString : String = {
     return "PublicKey("+seed_m.toString()+")"
+  }
+}
+
+
+case class TermSecretKey(seed: Term) extends Term {
+  val seed_m=seed
+
+  override def toString : String = {
+    return "SecretKey("+seed_m.toString()+")"
   }
 }
