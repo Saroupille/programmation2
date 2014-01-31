@@ -4,14 +4,14 @@
 
 //sealed : all inherited case classes have to be implemented in this file
 abstract sealed class Proc() {
-	def toString()
+	def toString : String
 }
 
 case class ProcIn(c : String, x : Term) extends Proc {
 	val channel = c 
 	val store = x
 
-	def toString() = {
-		println("in(" + c + "," + x.toString() + ")")
+	override def toString : String = {
+		return "in(" + channel + "," + store.toString() + ")"
 	}
 }
