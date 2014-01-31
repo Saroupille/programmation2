@@ -14,6 +14,7 @@ case class TermValue(v: Value) extends Term {
 
   override def toString : String = {
     return v.toString
+  }
 }
 
 case class TermVariable(v : String) extends Term {
@@ -22,6 +23,15 @@ case class TermVariable(v : String) extends Term {
 	override def toString : String = {
 		return variable
 	}
+}
+
+//Probably not Any
+case class TermList(l: List[Any]) extends Term {
+  val list=l
+
+  override def toString : String = {
+    return list.toString
+  }
 }
 
 case class TermPair(t1 : Term, t2 : Term) extends Term {
