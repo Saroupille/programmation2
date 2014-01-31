@@ -18,6 +18,7 @@ object ValueInteger {
 	def unapply(vi : ValueInteger): Option[Int] = Some(vi.value)
 }
 
+
 // Extractor class for constant values
 class ValueConst(s : String) extends Value {
 	val identifier = s
@@ -31,24 +32,55 @@ object ValueConst {
 }
 
 
+// Extractor class for count values
+class ValueCount(l : List[Term]) extends Value {
+	val list = l
+
+	override def toString : String = {
+		def listToString(l : List[Term]) : String =  {
+			l match {
+				case head :: tail =>  head.toString + "," + listToString(tail)
+				case List() => "0"
+			}
+		}
+		"count(" + listToString(list) + ")"
+	}
+}
+object ValueCount {
+	def unapply(vc : ValueCount): Option[List[Term]] = Some(vc.list)
+}
+
+
 //Some tests
 object Test extends App {
-	val p = new ValueInteger(10)
-	val p2 = new ValueConst("NomVal")
-	val p1 = new ValueInteger(15)
 
-	p2 match {
-		case ValueInteger(n) => println ("Valeur de p2 : " + n)
-		case ValueConst(str) => println ("Nom de p2 : " + str)
+	def printListTest(l : List[Term]) : String = {
+		l match {
+			case List() => ""
+			case ValueConst(s) :: tail => {
+				"Constant named " + s + "\n" +
+				printListTest(tail)
+			}
+			case ValueInteger(i) :: tail => {
+				"Integer value = " + i + "\n" +
+				printListTest(tail)
+			}
+		}
 	}
 
-	p match {
-		case ValueInteger(n) => println ("Valeur de p : " + n)
-		case ValueConst(str) => println ("Nom de p : " + str)
-	}
+	val termList = List(
+		new ValueConst("Const 1"), 
+		new ValueConst("Const 2"), 
+		new ValueInteger(15), 
+		new ValueConst("Const 3"), 
+		new ValueInteger(30), 
+		new ValueInteger(40))
 
-	p1 match {
-		case ValueInteger(n) => println ("Valeur de p1 : " + n)
-		case ValueConst(str) => println ("Nom de p1 : " + str)
-	}
+	val countTest = new ValueCount(termList)
+
+	//test 1
+	println(countTest.toString)
+
+	//test 2
+	println(printListTest(termList))
 }
