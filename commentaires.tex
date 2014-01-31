@@ -1,7 +1,14 @@
 \documentclass{article}
 \usepackage[utf8x]{inputenc}
+\usepackage{color}
+\usepackage{hyperref}
 
 \begin{document}
+
+\newcommand{\vic}[1]{\textcolor{blue}{#1}}
+\newcommand{\fra}[1]{\textcolor{red}{#1}}
+
+
 
 \section{TO DO list}
 \begin{itemize}
@@ -29,16 +36,16 @@ Convention de nommage :
 \item Indentation à 4 espaces~;
 \end{itemize}
 \section{Commentaires}
-\paragraph{extractors}
-Je doute encore afin de savoir si c'est la bonne façon de faire. Cette histoire d'objet au lieu de classe etc... me perturbe. Utiliser de la composition peut s'avérer pas si mal. Je ne sais pas ce que tu en penses...
-\paragraph{Réponse}
-Je sais pas si c'est la bonne façon, mais en tout cas, c'est la manière conseillée par le compilo plutôt que d'imbriquer des case classes. J'ai testé la composition, ça me parrait un peu moins flexible, et un peu plus lourd : il faut d'abord déclarer un objet du type voulu (du style ValueInteger) et l'envoyer après en paramètre à une classe Value qui va le stocker. 
+\paragraph{Extractors :}
+\fra{Je doute encore afin de savoir si c'est la bonne façon de faire. Cette histoire d'objet au lieu de classe etc... me perturbe. Utiliser de la composition peut s'avérer pas si mal. Je ne sais pas ce que tu en penses...}
 
-\paragraph{Commentaires}
-Le Java est un langage assez normalisé, beaucoup de \textit{bureaucratie} comme dirait Julius. Pour ce projet, je pense qu'on peut en profiter pour s'habituer aux conventions. Comme doxygene en C++, il existe des générateurs de doc pour Java, et donc Scala. Pour cela, il faut utiliser des commentaires un peu spéciaux. Je regarde sur internet en ce moment même pour en savoir un peu plus.
-\paragraph{Réponse}
+\vic{Je sais pas si c'est la bonne façon, mais en tout cas, c'est la manière conseillée par le compilo plutôt que d'imbriquer des case classes. J'ai testé la composition, ça me parrait un peu moins flexible, et un peu plus lourd : il faut d'abord déclarer un objet du type voulu (du style ValueInteger) et l'envoyer après en paramètre à une classe Value qui va le stocker. }
+
+\paragraph{Commentaires :}
+\fra{Le Java est un langage assez normalisé, beaucoup de \textit{bureaucratie} comme dirait Julius. Pour ce projet, je pense qu'on peut en profiter pour s'habituer aux conventions. Comme doxygene en C++, il existe des générateurs de doc pour Java, et donc Scala. Pour cela, il faut utiliser des commentaires un peu spéciaux. Je regarde sur internet en ce moment même pour en savoir un peu plus.}
+\vic{
 Tu m'expliqueras comment on fait, que je normalise mes commentaires, ils sont faits un peu n'importe comment là. 
 A part ça, je vais tout de suite renommer mes attributs avec le \_m à la fin.
-
-
+}
+\fra{Tu regardes ici \url{https://wiki.scala-lang.org/display/SW/Writing+Documentation}, j'ai commencé à faire un truc, on va voir si l'algorithme de merge fonctionne bien.}
 \end{document}
