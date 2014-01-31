@@ -1,5 +1,7 @@
-/*
-	Values definition class
+/**
+  * values.scala - Definitions of different case classes to represent a value
+  * @author Lanvin Victor Thiré François
+  * Copyright (c) 2014 GPLv3. See LICENCE file
 */
 
 abstract case class Value() extends Term {
