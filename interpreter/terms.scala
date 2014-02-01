@@ -82,37 +82,54 @@ case class TermDecode(cypher: Term, key : Term) extends Term {
 }
 
 
-case class TermPublicKey(seed: Value) extends Term {
-  
-  val keyGenerator = KeyPairGenerator.getInstance("RSA");
-  val secureSeed=SecureRandom.getInstance("SHA1PRNG");
-  secureSeed.setSeed(seed.getValue);
-  keyGenerator.initialize(2048,secureSeed);
-  val keyPair = keyGenerator.generateKeyPair();
-  val publicKey=keyPair.getPublic();
+case class TermPublicKey(v: Value) extends Term {
+
+  val publicKey_m={
+    var seed=0
+    v match {
+      case ValueInteger(n) => seed=n
+      case _ => throw new noIntegerPublicKey("bouh")
+    }
+    val keyGenerator = KeyPairGenerator.getInstance("RSA");
+    /*with SHA1PRNG, generation of keys is deterministic. 
+     It is not secured.*/
+    val secureSeed=SecureRandom.getInstance("SHA1PRNG");
+    secureSeed.setSeed(seed);
+    keyGenerator.initialize(2048,secureSeed);
+    val keyPair = keyGenerator.generateKeyPair();
+    keyPair.getPublic();
+  }
 
   def execute() : java.security.PublicKey = {
-    return publicKey
+    return publicKey_m
   }
+
   override def toString : String = {
-    return "PublicKey("+publicKey.toString()+")"
+    return "PublicKey("+publicKey_m.toString()+")"
   }
 }
 
 
-case class TermSecreteKey(seed: Value) extends Term {
-  val keyGenerator = KeyPairGenerator.getInstance("RSA");
-  val secureSeed=SecureRandom.getInstance("SHA1PRNG");
-  secureSeed.setSeed(seed.getValue);
-  keyGenerator.initialize(2048,secureSeed);
-  val keyPair = keyGenerator.generateKeyPair();
-  val privateKey=keyPair.getPrivate();
+case class TermSecreteKey(v: Value) extends Term {
+  val privateKey_m={ //See TermPublicKey
+    var seed=0
+    v match {
+      case ValueInteger(n) => seed=n
+      case _ => throw new noIntegerSecreteKey("bouh")
+    }
+    val keyGenerator = KeyPairGenerator.getInstance("RSA");
+    val secureSeed=SecureRandom.getInstance("SHA1PRNG");
+    secureSeed.setSeed(seed);
+    keyGenerator.initialize(2048,secureSeed);
+    val keyPair = keyGenerator.generateKeyPair();
+    keyPair.getPrivate();
+}
 
   def execute() : java.security.PrivateKey = {
-    return privateKey
+    return privateKey_m
   }
   override def toString : String = {
-    return "SecretKey("+privateKey.toString()+")"
+    return "SecretKey("+privateKey_m.toString()+")"
   }
 }
 
