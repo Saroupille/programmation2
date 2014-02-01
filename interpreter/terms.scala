@@ -4,6 +4,9 @@
   * Copyright (c) 2014 GPLv3. See LICENCE file
   */
 
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.nio.ByteBuffer;
 
 abstract class Term() {
 	def toString : String
@@ -78,19 +81,29 @@ case class TermDecode(cypher: Term, key : Term) extends Term {
   }
 }
 
-case class TermPublicKey(seed: Term) extends Term {
-  val seed_m=seed
+
+//OH FUCKING GODNESS IT WORKS !
+case class TermPublicKey(seed: Value) extends Term {
+  
+  val keyGenerator = KeyPairGenerator.getInstance("RSA");
+  val secureSeed=SecureRandom.getInstance("SHA1PRNG");
+  secureSeed.setSeed(seed.getValue);
+  keyGenerator.initialize(2048,secureSeed);
+  val keyPair = keyGenerator.generateKeyPair();
+  val publicKey=keyPair.getPublic();
 
   override def toString : String = {
-    return "PublicKey("+seed_m.toString()+")"
+    return "PublicKey("+publicKey.toString()+")"
   }
 }
 
 
-case class TermSecretKey(seed: Term) extends Term {
+case class TermSecretKey(seed: Value) extends Term {
   val seed_m=seed
-
+  
   override def toString : String = {
     return "SecretKey("+seed_m.toString()+")"
   }
 }
+
+
