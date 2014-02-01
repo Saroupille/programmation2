@@ -82,7 +82,6 @@ case class TermDecode(cypher: Term, key : Term) extends Term {
 }
 
 
-//OH FUCKING GODNESS IT WORKS !
 case class TermPublicKey(seed: Value) extends Term {
   
   val keyGenerator = KeyPairGenerator.getInstance("RSA");
@@ -92,17 +91,28 @@ case class TermPublicKey(seed: Value) extends Term {
   val keyPair = keyGenerator.generateKeyPair();
   val publicKey=keyPair.getPublic();
 
+  def execute() : java.security.PublicKey = {
+    return publicKey
+  }
   override def toString : String = {
     return "PublicKey("+publicKey.toString()+")"
   }
 }
 
 
-case class TermSecretKey(seed: Value) extends Term {
-  val seed_m=seed
-  
+case class TermSecreteKey(seed: Value) extends Term {
+  val keyGenerator = KeyPairGenerator.getInstance("RSA");
+  val secureSeed=SecureRandom.getInstance("SHA1PRNG");
+  secureSeed.setSeed(seed.getValue);
+  keyGenerator.initialize(2048,secureSeed);
+  val keyPair = keyGenerator.generateKeyPair();
+  val privateKey=keyPair.getPrivate();
+
+  def execute() : java.security.PrivateKey = {
+    return privateKey
+  }
   override def toString : String = {
-    return "SecretKey("+seed_m.toString()+")"
+    return "SecretKey("+privateKey.toString()+")"
   }
 }
 
