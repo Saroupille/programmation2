@@ -47,53 +47,140 @@ object ValueConst {
 
 
 // Extractor class for count values
-class ValueCount(l : List[Term]) extends Value {
+class ValueCount(l : TermList) extends Value {
   val list = l
 
   override def toString : String = {
-	def listToString(l : List[Term]) : String =  {
-	  l match {
-		case head :: tail =>  head.toString + "," + listToString(tail)
-		case List() => "0"
-	  }
-	}
-	"count(" + listToString(list) + ")"
+  	"count(" + list.toString + ")"
   }
-
 
   def getValue : Int = {
     return 1
   }
 }
 object ValueCount {
-  def unapply(vc : ValueCount): Option[List[Term]] = Some(vc.list)
+  def unapply(vc : ValueCount): Option[TermList] = Some(vc.list)
 }
+
+
+// Extractor class for value V > V'
+class ValueSuperior(leftv : Value, rightv : Value) extends Value {
+  val leftValue = leftv
+  val rightValue = rightv 
+
+  override def toString : String = {
+    leftValue.toString + " > " + rightValue.toString
+  }
+
+  def getValue : Int = {
+    return 1
+  }
+}
+object ValueSuperior {
+  def unapply(vs : ValueSuperior): Option[(Value, Value)] = Some((vs.leftValue, vs.rightValue))
+}
+
+
+// Extractor class for value V = V'
+class ValueEqual(leftv : Value, rightv : Value) extends Value {
+  val leftValue = leftv
+  val rightValue = rightv 
+
+  override def toString : String = {
+    leftValue.toString + " = " + rightValue.toString
+  }
+
+  def getValue : Int = {
+    return 1
+  }
+}
+object ValueEqual {
+  def unapply(ve : ValueEqual): Option[(Value, Value)] = Some((ve.leftValue, ve.rightValue))
+}
+
+
+// Extractor class for value V /\ V'
+class ValueAnd(leftv : Value, rightv : Value) extends Value {
+  val leftValue = leftv
+  val rightValue = rightv 
+
+  override def toString : String = {
+    leftValue.toString + " /\\ " + rightValue.toString
+  }
+
+  def getValue : Int = {
+    return 1
+  }
+}
+object ValueAnd {
+  def unapply(va : ValueAnd): Option[(Value, Value)] = Some((va.leftValue, va.rightValue))
+}
+
+
+// Extractor class for value V \/ V'
+class ValueOr(leftv : Value, rightv : Value) extends Value {
+  val leftValue = leftv
+  val rightValue = rightv 
+
+  override def toString : String = {
+    leftValue.toString + " \\/ " + rightValue.toString
+  }
+
+  def getValue : Int = {
+    return 1
+  }
+}
+object ValueOr {
+  def unapply(vo : ValueOr): Option[(Value, Value)] = Some((vo.leftValue, vo.rightValue))
+}
+
+
+// Extractor class for value not(V)
+class ValueNot(v : Value) extends Value {
+  val argValue = v
+
+  override def toString : String = {
+    "not(" + argValue.toString + ")"
+  }
+
+  def getValue : Int = {
+    return 1
+  }
+}
+object ValueNot {
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.argValue)
+}
+
 
 
 //Some tests
 object Test extends App {
 
   def printListTest(l : List[Term]) : String = {
-	l match {
-	  case List() => ""
-	  case ValueConst(s) :: tail => {
-		"Constant named " + s + "\n" +
-		printListTest(tail)
-	  }
-	  case ValueInteger(i) :: tail => {
-		"Integer value = " + i + "\n" +
-		printListTest(tail)
-	  }
-	}
+  	l match {
+  	  case List() => ""
+  	  case ValueConst(s) :: tail => {
+  		  "Constant named " + s + "\n" +
+  		  printListTest(tail)
+  	  }
+  	  case ValueInteger(i) :: tail => {
+  		  "Integer value = " + i + "\n" +
+  		  printListTest(tail)
+  	  }
+      case ValueSuperior(v1,v2) :: tail => {
+        "Superior value : " + v1.toString + " > " + v2.toString + printListTest(tail)
+      }
+  	}
   }
 
-  val termList = List(
+  val termList = new TermList(List(
 	new ValueConst("Const 1"),
 	new ValueConst("Const 2"),
 	new ValueInteger(15),
 	new ValueConst("Const 3"),
 	new ValueInteger(30),
-	new ValueInteger(40))
+	new ValueInteger(40),
+  new ValueSuperior(new ValueInteger(40), new ValueInteger(50))))
 
   val countTest = new ValueCount(termList)
 
@@ -101,7 +188,7 @@ object Test extends App {
   println(countTest.toString)
 
   //test 2
-  println(printListTest(termList))
+  println(printListTest(termList.list))
 
   val publicKey = new TermPublicKey(new ValueInteger(15))
   val privateKey =new TermSecreteKey(new ValueInteger(15))

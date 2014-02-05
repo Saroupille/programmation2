@@ -32,7 +32,13 @@ case class TermList(l: List[Term]) extends Term {
   val list=l
 
   override def toString : String = {
-    return "List("+list.toString+")"
+    def listToString(l : List[Term]) : String =  {
+      l match {
+        case head :: tail =>  head.toString + "," + listToString(tail)
+        case List() => "0"
+      }
+    }
+    "[" + listToString(list) + "]"
   }
 }
 
