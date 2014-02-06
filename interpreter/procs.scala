@@ -10,10 +10,19 @@ abstract sealed class Proc() {
 }
 
 case class ProcIn(c : String, x : Term) extends Proc {
-	val channel = c
-	val store = x
+	val channel_m = c
+	val store_m = x
 
 	override def toString : String = {
-		return "in(" + channel + "," + store.toString() + ")"
+		return "in(" + channel_m + "," + store_m.toString() + ")"
+	}
+}
+
+case class ProcOut(c : String, m : Term) extends Proc {
+	val channel_m = c
+	val message_m = m
+
+	override def toString : String = {
+		return "out(" + channel_m + "," + message_m.toString() + ")"
 	}
 }
