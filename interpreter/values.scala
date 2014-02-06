@@ -31,10 +31,10 @@ object ValueInteger {
 
 // Extractor class for constant values
 class ValueConst(s : String) extends Value {
-  val identifier = s
+  val identifier_m = s
 
   override def toString : String = {
-	return identifier
+	return identifier_m
   }
 
   def getValue : Int = {
@@ -42,16 +42,16 @@ class ValueConst(s : String) extends Value {
   }
 }
 object ValueConst {
-  def unapply(vc : ValueConst): Option[String] = Some(vc.identifier)
+  def unapply(vc : ValueConst): Option[String] = Some(vc.identifier_m)
 }
 
 
 // Extractor class for count values
 class ValueCount(l : TermList) extends Value {
-  val list = l
+  val list_m = l
 
   override def toString : String = {
-  	"count(" + list.toString + ")"
+  	"count(" + list_m.toString + ")"
   }
 
   def getValue : Int = {
@@ -59,17 +59,17 @@ class ValueCount(l : TermList) extends Value {
   }
 }
 object ValueCount {
-  def unapply(vc : ValueCount): Option[TermList] = Some(vc.list)
+  def unapply(vc : ValueCount): Option[TermList] = Some(vc.list_m)
 }
 
 
 // Extractor class for value V > V'
 class ValueSuperior(leftv : Value, rightv : Value) extends Value {
-  val leftValue = leftv
-  val rightValue = rightv 
+  val leftValue_m = leftv
+  val rightValue_m = rightv 
 
   override def toString : String = {
-    leftValue.toString + " > " + rightValue.toString
+    leftValue_m.toString + " > " + rightValue_m.toString
   }
 
   def getValue : Int = {
@@ -77,17 +77,17 @@ class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   }
 }
 object ValueSuperior {
-  def unapply(vs : ValueSuperior): Option[(Value, Value)] = Some((vs.leftValue, vs.rightValue))
+  def unapply(vs : ValueSuperior): Option[(Value, Value)] = Some((vs.leftValue_m, vs.rightValue_m))
 }
 
 
 // Extractor class for value V = V'
 class ValueEqual(leftv : Value, rightv : Value) extends Value {
-  val leftValue = leftv
-  val rightValue = rightv 
+  val leftValue_m = leftv
+  val rightValue_m = rightv 
 
   override def toString : String = {
-    leftValue.toString + " = " + rightValue.toString
+    leftValue_m.toString + " = " + rightValue_m.toString
   }
 
   def getValue : Int = {
@@ -95,17 +95,17 @@ class ValueEqual(leftv : Value, rightv : Value) extends Value {
   }
 }
 object ValueEqual {
-  def unapply(ve : ValueEqual): Option[(Value, Value)] = Some((ve.leftValue, ve.rightValue))
+  def unapply(ve : ValueEqual): Option[(Value, Value)] = Some((ve.leftValue_m, ve.rightValue_m))
 }
 
 
 // Extractor class for value V /\ V'
 class ValueAnd(leftv : Value, rightv : Value) extends Value {
-  val leftValue = leftv
-  val rightValue = rightv 
+  val leftValue_m = leftv
+  val rightValue_m = rightv 
 
   override def toString : String = {
-    leftValue.toString + " /\\ " + rightValue.toString
+    leftValue_m.toString + " /\\ " + rightValue_m.toString
   }
 
   def getValue : Int = {
@@ -113,17 +113,17 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   }
 }
 object ValueAnd {
-  def unapply(va : ValueAnd): Option[(Value, Value)] = Some((va.leftValue, va.rightValue))
+  def unapply(va : ValueAnd): Option[(Value, Value)] = Some((va.leftValue_m, va.rightValue_m))
 }
 
 
 // Extractor class for value V \/ V'
 class ValueOr(leftv : Value, rightv : Value) extends Value {
-  val leftValue = leftv
-  val rightValue = rightv 
+  val leftValue_m = leftv
+  val rightValue_m = rightv 
 
   override def toString : String = {
-    leftValue.toString + " \\/ " + rightValue.toString
+    leftValue_m.toString + " \\/ " + rightValue_m.toString
   }
 
   def getValue : Int = {
@@ -131,16 +131,16 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   }
 }
 object ValueOr {
-  def unapply(vo : ValueOr): Option[(Value, Value)] = Some((vo.leftValue, vo.rightValue))
+  def unapply(vo : ValueOr): Option[(Value, Value)] = Some((vo.leftValue_m, vo.rightValue_m))
 }
 
 
 // Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
-  val argValue = v
+  val argValue_m = v
 
   override def toString : String = {
-    "not(" + argValue.toString + ")"
+    "not(" + argValue_m.toString + ")"
   }
 
   def getValue : Int = {
@@ -148,7 +148,7 @@ class ValueNot(v : Value) extends Value {
   }
 }
 object ValueNot {
-  def unapply(vn : ValueNot): Option[Value] = Some(vn.argValue)
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.argValue_m)
 }
 
 
@@ -190,7 +190,7 @@ object Test extends App {
   println(printListTest(termList.list))
 
   val publicKey = new TermPublicKey(new ValueInteger(15))
-  val privateKey =new TermSecreteKey(new ValueInteger(15))
+  val privateKey =new TermSecretKey(new ValueInteger(15))
   val cipher = Cipher.getInstance("RSA")
   cipher.init(Cipher.ENCRYPT_MODE,publicKey.execute)
   val cipherText = cipher.doFinal("test".getBytes())

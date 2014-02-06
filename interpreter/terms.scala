@@ -116,12 +116,12 @@ case class TermPublicKey(v: Value) extends Term {
 }
 
 
-case class TermSecreteKey(v: Value) extends Term {
+case class TermSecretKey(v: Value) extends Term {
   val privateKey_m={ //See TermPublicKey
     var seed=0
     v match {
       case ValueInteger(n) => seed=n
-      case _ => throw new noIntegerSecreteKey("bouh")
+      case _ => throw new noIntegerSecretKey("bouh")
     }
     val keyGenerator = KeyPairGenerator.getInstance("RSA");
     val secureSeed=SecureRandom.getInstance("SHA1PRNG");
