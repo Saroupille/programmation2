@@ -155,11 +155,15 @@ object ValueNot {
 //Some tests
 object Test extends App {
 
+  def testFun (a : Proc) = {
+    println(a.toString)
+  }
+
   val parsing = new Parser();
 
-  val parseTest = parsing.parse("out(canal,enc(10,variable)).in(canal2,x).0");
+  val parseTest = parsing.parse("out(canal ,enc(10 ,variable )).in( canal2,x)|| out( canal,enc(15, var)).new q||in(c, y).0||0");
 
-  println(parseTest.toString);
+  parseTest.foreach(testFun);
 
   val publicKey = new TermPublicKey(new ValueInteger(15))
   val privateKey =new TermSecretKey(new ValueInteger(15))

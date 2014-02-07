@@ -50,6 +50,6 @@ case class ProcNew(v : ValueConst, p : Proc) extends Proc {
 	val procNext_m = p
 
 	override def toString : String = {
-		return "new " + value_m.toString + "." + procNext_m.toString()
+		return "new(" + value_m.toString + ")." + procNext_m.toString()
 	}
 }

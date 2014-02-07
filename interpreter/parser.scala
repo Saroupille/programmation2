@@ -89,8 +89,8 @@ class Parser {
 			return new ProcIf(valueTest, procThen, procElse)
 		}
 		else if (str.startsWith("new")) {
-			val nomVar = new ValueConst(str.substring(3));
 			val endNew = str.indexOf('.');
+			val nomVar = new ValueConst(str.substring(3, endNew));
 			val nextProc = parseProc(str.substring(endNew + 1));
 			return new ProcNew(nomVar, nextProc);
 		}
@@ -102,7 +102,14 @@ class Parser {
 		}
 	}
 	
-	def parse(str : String) : Proc = {
-		return parseProc(str);
+	def parse(str : String) : List[Proc] = {
+		val strArray = str.replaceAll(" ", "").split("""\|\|""");
+		def parseAux (lstr : List[String]) : List[Proc]  = {
+			lstr match {
+				case List() => List()
+				case p::tail => parseProc(p.concat(".0"))::parseAux(tail)
+			}
+		}
+		parseAux(strArray.toList);
 	}
 }
