@@ -155,24 +155,29 @@ object ValueNot {
 //Some tests
 object Test extends App {
 
+  def printValueTest(v : Value) : String = {
+    v match {
+      case ValueConst(s) => "Constant named " + s + "\n"
+      case ValueInteger(i) => "Integer value = " + i + "\n"
+      case ValueSuperior(v1, v2) => "Superior value : " + v1.toString + " > " + v2.toString
+    }
+  }
+
   def printListTest(l : List[Term]) : String = {
   	l match {
   	  case List() => ""
-  	  case ValueConst(s) :: tail => {
-  		  "Constant named " + s + "\n" +
+  	  case TermVariable(s) :: tail => {
+  		  "Variable named " + s + "\n" +
   		  printListTest(tail)
   	  }
-  	  case ValueInteger(i) :: tail => {
-  		  "Integer value = " + i + "\n" +
-  		  printListTest(tail)
+  	  case (v : Value) :: tail => {
+  		  printValueTest(v) + printListTest(tail)
   	  }
-      case ValueSuperior(v1,v2) :: tail => {
-        "Superior value : " + v1.toString + " > " + v2.toString + printListTest(tail)
-      }
   	}
   }
 
   val termList = new TermList(List(
+  new TermVariable("Var1"),
 	new ValueConst("Const 1"),
 	new ValueConst("Const 2"),
 	new ValueInteger(15),
