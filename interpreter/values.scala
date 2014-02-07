@@ -17,7 +17,7 @@ class ValueInteger(v : Int) extends Value {
 
 
   override def toString : String = {
-	return value_m.toString
+	 return value_m.toString
   }
 
   def getValue : Int = {
@@ -34,7 +34,7 @@ class ValueConst(s : String) extends Value {
   val identifier_m = s
 
   override def toString : String = {
-	return identifier_m
+	 return identifier_m
   }
 
   def getValue : Int = {
@@ -155,44 +155,11 @@ object ValueNot {
 //Some tests
 object Test extends App {
 
-  def printValueTest(v : Value) : String = {
-    v match {
-      case ValueConst(s) => "Constant named " + s + "\n"
-      case ValueInteger(i) => "Integer value = " + i + "\n"
-      case ValueSuperior(v1, v2) => "Superior value : " + v1.toString + " > " + v2.toString
-    }
-  }
+  val parsing = new Parser();
 
-  def printListTest(l : List[Term]) : String = {
-  	l match {
-  	  case List() => ""
-  	  case TermVariable(s) :: tail => {
-  		  "Variable named " + s + "\n" +
-  		  printListTest(tail)
-  	  }
-  	  case (v : Value) :: tail => {
-  		  printValueTest(v) + printListTest(tail)
-  	  }
-  	}
-  }
+  val parseTest = parsing.parse("out(canal,enc(10,variable)).in(canal2,x).0");
 
-  val termList = new TermList(List(
-  new TermVariable("Var1"),
-	new ValueConst("Const 1"),
-	new ValueConst("Const 2"),
-	new ValueInteger(15),
-	new ValueConst("Const 3"),
-	new ValueInteger(30),
-	new ValueInteger(40),
-  new ValueSuperior(new ValueInteger(40), new ValueInteger(50))))
-
-  val countTest = new ValueCount(termList)
-
-  //test 1
-  println(countTest.toString)
-
-  //test 2
-  println(printListTest(termList.list))
+  println(parseTest.toString);
 
   val publicKey = new TermPublicKey(new ValueInteger(15))
   val privateKey =new TermSecretKey(new ValueInteger(15))
