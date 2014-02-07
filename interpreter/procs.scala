@@ -26,3 +26,21 @@ case class ProcOut(c : String, m : Term) extends Proc {
 		return "out(" + channel_m + "," + message_m.toString() + ")"
 	}
 }
+
+case class ProcIf(v : Value, p1 : Proc, p2 : Proc) extends Proc {
+	val value_m = v
+	val then_m = p1
+	val else_m = p2
+
+	override def toString : String = {
+		return "if " + value_m.toString + " then " + then_m.toString + " else " + else_m.toString
+	}
+}
+
+case class ProcNew(v : ValueConst) extends Proc {
+	val value_m = v
+
+	override def toString : String = {
+		return "new " + value_m.toString
+	}
+}
