@@ -82,12 +82,12 @@ object ValueSuperior {
 
 
 // Extractor class for value V = V'
-class ValueEqual(leftv : Value, rightv : Value) extends Value {
-  val leftValue_m = leftv
-  val rightValue_m = rightv 
+class ValueEqual(leftv : Term, rightv : Term) extends Value {
+  val leftTerm_m = leftv
+  val rightTerm_m = rightv 
 
   override def toString : String = {
-    leftValue_m.toString + " = " + rightValue_m.toString
+    leftTerm_m.toString + " = " + rightTerm_m.toString
   }
 
   def getValue : Int = {
@@ -95,7 +95,7 @@ class ValueEqual(leftv : Value, rightv : Value) extends Value {
   }
 }
 object ValueEqual {
-  def unapply(ve : ValueEqual): Option[(Value, Value)] = Some((ve.leftValue_m, ve.rightValue_m))
+  def unapply(ve : ValueEqual): Option[(Term, Term)] = Some((ve.leftTerm_m, ve.rightTerm_m))
 }
 
 

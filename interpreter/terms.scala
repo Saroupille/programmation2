@@ -12,14 +12,6 @@ abstract class Term() {
 	def toString : String
 }
 
-case class TermValue(v: Value) extends Term {
-  val value=v
-
-  override def toString : String = {
-    return "Value("+v.toString+")"
-  }
-}
-
 case class TermVariable(v : String) extends Term {
 	val variable = v
 
