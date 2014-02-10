@@ -5,6 +5,20 @@
 */
 
 class Parser {
+	def parseComma(str : String) : Int = {
+	    //parenthesisCount = 0 ssi on a vu autant de parenthèses ouvrantes que fermantes (modulo la première ouvrante)
+	    var parenthesisCount = -1;    // Initialisé à -1 car on va parser la parenthèse ouvrante de Pair(
+	    var i = 0;
+	    while(parenthesisCount != 0 || str.charAt(i) != ',') {
+	        if (str.charAt(i) == '(')
+	            parenthesisCount += 1;
+	        else if (str.charAt(i) == ')')
+	            parenthesisCount -= 1;
+	        i += 1;
+	    }
+	    return i
+	}
+
 	def parseValue(str: String) : Value = {
 		val value = str.toInt;
 		return new ValueInteger(value);
@@ -12,7 +26,7 @@ class Parser {
 
 	def parseTerm(str: String) : Term = {
 		if (str.startsWith("pair(")) {
-			val nextComma = str.indexOf(',');
+			val nextComma = parseComma(str);
 			val termEnd = str.lastIndexOf(')');
 			val leftTerm = parseTerm(str.substring(5, nextComma));
 			val rightTerm = parseTerm(str.substring(nextComma+1, termEnd));
@@ -29,14 +43,14 @@ class Parser {
 			return new TermProj2(termProj);
 		}
 		else if (str.startsWith("enc(")) {
-			val nextComma = str.indexOf(',');
+			val nextComma = parseComma(str);
 			val termEnd = str.lastIndexOf(')');
 			val leftTerm = parseTerm(str.substring(4, nextComma));
 			val rightTerm = parseTerm(str.substring(nextComma+1, termEnd));
 			return new TermEncode(leftTerm, rightTerm);
 		}
 		else if (str.startsWith("dec(")) {
-			val nextComma = str.indexOf(',');
+			val nextComma = parseComma(str);
 			val termEnd = str.lastIndexOf(')');
 			val leftTerm = parseTerm(str.substring(4, nextComma));
 			val rightTerm = parseTerm(str.substring(nextComma+1, termEnd));
