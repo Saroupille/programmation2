@@ -161,7 +161,7 @@ object Test extends App {
 
   val parsing = new Parser();
 
-  val parseTest = parsing.parse("out(canal ,enc(10 ,variable )).in( canal2,x)|| out( canal,enc(15, var)).new q||in(c, y).0||0");
+  val parseTest = parsing.parse("out(chan, pair(pair(enc(10,x),enc(10,y)),10))");//"out(chan,pair(pair(pair(15,15),enc(10,x)),10))");
 
   parseTest.foreach(testFun);
 
