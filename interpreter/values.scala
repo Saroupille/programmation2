@@ -129,7 +129,7 @@ class ValueEqual(leftv : Term, rightv : Term) extends Value {
   }
 
   def interprete : String = {
-    return ""
+    return (leftTerm_m.interprete==rightTerm_m.interprete).toString
   }
 }
 object ValueEqual {
@@ -151,7 +151,7 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   }
 
   def interprete : String = {
-    return ""
+    return (leftValue_m.interprete!="0" && rightValue_m!="0").toString
   }
 }
 object ValueAnd {
@@ -173,7 +173,7 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   }
 
   def interprete : String = {
-    return ""
+    return (leftValue_m.interprete!="0" || rightValue_m!="0").toString
   }
 }
 object ValueOr {
@@ -183,10 +183,10 @@ object ValueOr {
 
 // Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
-  val argValue_m = v
+  val value_m = v
 
   override def toString : String = {
-    "not(" + argValue_m.toString + ")"
+    "not(" + value_m.toString + ")"
   }
 
   def getValue : Int = {
@@ -194,11 +194,13 @@ class ValueNot(v : Value) extends Value {
   }
 
   def interprete : String = {
-    return ""
+    return (value_m=="0").toString
   }
+
+ 
 }
 object ValueNot {
-  def unapply(vn : ValueNot): Option[Value] = Some(vn.argValue_m)
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.value_m)
 }
 
 
