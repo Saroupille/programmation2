@@ -23,6 +23,10 @@ class ValueInteger(v : Int) extends Value {
   def getValue : Int = {
     return value_m
   }
+
+  def interprete : String = {
+    return value_m.toString
+  }
 }
 object ValueInteger {
   def unapply(vi : ValueInteger): Option[Int] = Some(vi.value_m)
@@ -40,6 +44,10 @@ class ValueConst(s : String) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return identifier_m
+  }
 }
 object ValueConst {
   def unapply(vc : ValueConst): Option[String] = Some(vc.identifier_m)
@@ -54,8 +62,30 @@ class ValueCount(l : TermList) extends Value {
   	"count(" + list_m.toString + ")"
   }
 
-  def getValue : Int = {
+  def getValue : Int = { 
     return 1
+  }
+
+  def interprete : String = {
+    def aux( l:List[Term]) : String = {
+      l match {
+        case List() => "0"
+        case head::tail => try {
+          val h = head.interprete.toInt
+          if (h==0)
+            aux(tail)
+          else
+            1+aux(tail)
+        } catch {
+          case e:Exception=>{
+            aux(tail)
+          }
+        }
+      }
+    }
+    list_m match {
+      case TermList(l) => return aux(l)
+    }
   }
 }
 object ValueCount {
@@ -75,6 +105,10 @@ class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return if (leftValue_m.interprete.toInt > rightValue_m.interprete.toInt) "1" else "0"
+  }
 }
 object ValueSuperior {
   def unapply(vs : ValueSuperior): Option[(Value, Value)] = Some((vs.leftValue_m, vs.rightValue_m))
@@ -92,6 +126,10 @@ class ValueEqual(leftv : Term, rightv : Term) extends Value {
 
   def getValue : Int = {
     return 1
+  }
+
+  def interprete : String = {
+    return ""
   }
 }
 object ValueEqual {
@@ -111,6 +149,10 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return ""
+  }
 }
 object ValueAnd {
   def unapply(va : ValueAnd): Option[(Value, Value)] = Some((va.leftValue_m, va.rightValue_m))
@@ -129,6 +171,10 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return ""
+  }
 }
 object ValueOr {
   def unapply(vo : ValueOr): Option[(Value, Value)] = Some((vo.leftValue_m, vo.rightValue_m))
@@ -145,6 +191,10 @@ class ValueNot(v : Value) extends Value {
 
   def getValue : Int = {
     return 1
+  }
+
+  def interprete : String = {
+    return ""
   }
 }
 object ValueNot {
@@ -164,7 +214,7 @@ object Test extends App {
   val parseTest = parsing.parse("out(chan, pair(pair(enc(10,x),enc(10,y)),10))");//"out(chan,pair(pair(pair(15,15),enc(10,x)),10))");
 
   parseTest.foreach(testFun);
-
+/*
   val publicKey = new TermPublicKey(new ValueInteger(15))
   val privateKey =new TermSecretKey(new ValueInteger(15))
   val cipher = Cipher.getInstance("RSA")
@@ -175,4 +225,5 @@ object Test extends App {
   cipher.init(Cipher.DECRYPT_MODE, privateKey.execute)
   val text=new String(cipher.doFinal(cipherText),"UTF8")
   println(text);
+*/
 }
