@@ -24,6 +24,10 @@ class ValueInteger(v : Int) extends Value {
   def getValue : Int = {
     return value_m
   }
+
+  def interprete : String = {
+    return value_m.toString
+  }
 }
 object ValueInteger {
   def unapply(vi : ValueInteger): Option[Int] = Some(vi.value_m)
@@ -41,6 +45,10 @@ class ValueConst(s : String) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return identifier_m
+  }
 }
 object ValueConst {
   def unapply(vc : ValueConst): Option[String] = Some(vc.identifier_m)
@@ -55,8 +63,30 @@ class ValueCount(l : TermList) extends Value {
   	"count(" + list_m.toString + ")"
   }
 
-  def getValue : Int = {
+  def getValue : Int = { 
     return 1
+  }
+
+  def interprete : String = {
+    def aux( l:List[Term]) : String = {
+      l match {
+        case List() => "0"
+        case head::tail => try {
+          val h = head.interprete.toInt
+          if (h==0)
+            aux(tail)
+          else
+            1+aux(tail)
+        } catch {
+          case e:Exception=>{
+            aux(tail)
+          }
+        }
+      }
+    }
+    list_m match {
+      case TermList(l) => return aux(l)
+    }
   }
 }
 object ValueCount {
@@ -76,6 +106,10 @@ class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return if (leftValue_m.interprete.toInt > rightValue_m.interprete.toInt) "1" else "0"
+  }
 }
 object ValueSuperior {
   def unapply(vs : ValueSuperior): Option[(Value, Value)] = Some((vs.leftValue_m, vs.rightValue_m))
@@ -93,6 +127,10 @@ class ValueEqual(leftv : Term, rightv : Term) extends Value {
 
   def getValue : Int = {
     return 1
+  }
+
+  def interprete : String = {
+    return (leftTerm_m.interprete==rightTerm_m.interprete).toString
   }
 }
 object ValueEqual {
@@ -112,6 +150,10 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return (leftValue_m.interprete!="0" && rightValue_m!="0").toString
+  }
 }
 object ValueAnd {
   def unapply(va : ValueAnd): Option[(Value, Value)] = Some((va.leftValue_m, va.rightValue_m))
@@ -130,6 +172,10 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return (leftValue_m.interprete!="0" || rightValue_m!="0").toString
+  }
 }
 object ValueOr {
   def unapply(vo : ValueOr): Option[(Value, Value)] = Some((vo.leftValue_m, vo.rightValue_m))
@@ -138,18 +184,24 @@ object ValueOr {
 
 // Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
-  val argValue_m = v
+  val value_m = v
 
   override def toString : String = {
-    "not(" + argValue_m.toString + ")"
+    "not(" + value_m.toString + ")"
   }
 
   def getValue : Int = {
     return 1
   }
+
+  def interprete : String = {
+    return (value_m=="0").toString
+  }
+
+ 
 }
 object ValueNot {
-  def unapply(vn : ValueNot): Option[Value] = Some(vn.argValue_m)
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.value_m)
 }
 
 
@@ -166,14 +218,15 @@ object Test extends App {
 
   parseTest.foreach(testFun);
 
-  /*val publicKey = new TermPublicKey(new ValueInteger(15))
-  val privateKey =new TermSecretKey(new ValueInteger(15))
-  val cipher = Cipher.getInstance("RSA")
-  cipher.init(Cipher.ENCRYPT_MODE,publicKey.execute)
-  val cipherText = cipher.doFinal("test".getBytes())
- 
-  println(cipherText);
-  cipher.init(Cipher.DECRYPT_MODE, privateKey.execute)
-  val text=new String(cipher.doFinal(cipherText),"UTF8")
-  println(text);*/
+  /*
+    val publicKey = new TermPublicKey(new ValueInteger(15))
+    val privateKey =new TermSecretKey(new ValueInteger(15))
+    val cipher = Cipher.getInstance("RSA")
+    cipher.init(Cipher.ENCRYPT_MODE,publicKey.execute)
+    val cipherText = cipher.doFinal("test".getBytes())
+   
+    println(cipherText);
+    cipher.init(Cipher.DECRYPT_MODE, privateKey.execute)
+    val text=new String(cipher.doFinal(cipherText),"UTF8")
+    println(text);*/
 }

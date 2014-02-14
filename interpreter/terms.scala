@@ -62,7 +62,7 @@ case class TermList(l: List[Term]) extends Term {
         case head :: tail => head.interprete + "::" + aux(tail)
       }
     }
-    aux(list_m)
+    return aux(list_m)
   }
 }
 
