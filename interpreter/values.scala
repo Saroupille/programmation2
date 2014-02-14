@@ -9,6 +9,7 @@ import javax.crypto.Cipher;
 
 abstract case class Value() extends Term {
   def getValue : Int
+  def interprete : String = return ""
 }
 
 // Extractor class for integer values
@@ -161,11 +162,11 @@ object Test extends App {
 
   val parsing = new Parser();
 
-  val parseTest = parsing.parse("out(chan, pair(pair(enc(10,x),enc(10,y)),10))");//"out(chan,pair(pair(pair(15,15),enc(10,x)),10))");
+  val parseTest = parsing.parse("out(stdout, count(in(channel, x)::pair(10,15)::[]))|| out(stdout, 10::(15::12::13::[])::(14::13::12/\\11::[])::[])");
 
   parseTest.foreach(testFun);
 
-  val publicKey = new TermPublicKey(new ValueInteger(15))
+  /*val publicKey = new TermPublicKey(new ValueInteger(15))
   val privateKey =new TermSecretKey(new ValueInteger(15))
   val cipher = Cipher.getInstance("RSA")
   cipher.init(Cipher.ENCRYPT_MODE,publicKey.execute)
@@ -174,5 +175,5 @@ object Test extends App {
   println(cipherText);
   cipher.init(Cipher.DECRYPT_MODE, privateKey.execute)
   val text=new String(cipher.doFinal(cipherText),"UTF8")
-  println(text);
+  println(text);*/
 }
