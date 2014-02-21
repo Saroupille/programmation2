@@ -3,12 +3,12 @@
   * @author Lanvin Victor Thiré François
   * Copyright (c) 2014 GPLv3. See LICENCE file
   */
-
-import javax.crypto.Cipher;
+  
+import util.Random;
 
 
 abstract case class Value() extends Term {
-  var value_m : Int
+  var value_m : Int = -1
   def getValue : Int
 }
 
@@ -47,7 +47,11 @@ class ValueConst(s : String) extends Value {
   }
 
   def interprete : String = {
-    return identifier_m
+    if(value_m == -1) {
+      val rand = new Random();
+      value_m = rand.nextInt(100000000);
+    }
+    return value_m.toString;
   }
 }
 object ValueConst {
@@ -68,9 +72,9 @@ class ValueCount(l : Term) extends Value {
   }
 
   def interprete : String = {
-    def aux( l:List[Term]) : String = {
+    def aux( l:List[Term]) : Int = {
       l match {
-        case List() => "0"
+        case List() => 0
         case head::tail => try {
           val h = head.interprete.toInt
           if (h==0)
@@ -85,7 +89,9 @@ class ValueCount(l : Term) extends Value {
       }
     }
     list_m match {
-      case TermList(l) => return aux(l)
+      case TermList(l) => 
+        value_m = aux(l); 
+        return value_m.toString
     }
   }
 }
@@ -104,11 +110,12 @@ class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
-    return if (leftValue_m.interprete.toInt > rightValue_m.interprete.toInt) "1" else "0"
+    if (leftValue_m.interprete.toInt > rightValue_m.interprete.toInt) value_m = 1 else value_m = 0
+    return value_m.toString
   }
 }
 object ValueSuperior {
@@ -126,11 +133,12 @@ class ValueEqual(leftv : Term, rightv : Term) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
-    return (leftTerm_m.interprete==rightTerm_m.interprete).toString
+    value_m = if (leftTerm_m.interprete==rightTerm_m.interprete) 1 else 0
+    return value_m.toString
   }
 }
 object ValueEqual {
@@ -148,11 +156,12 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
-    return (leftValue_m.interprete!="0" && rightValue_m!="0").toString
+    value_m = if (leftValue_m.interprete!="0" && rightValue_m.interprete!="0") 1 else 0
+    return value_m.toString
   }
 }
 object ValueAnd {
@@ -170,11 +179,12 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
-    return (leftValue_m.interprete!="0" || rightValue_m!="0").toString
+    value_m = if (leftValue_m.interprete!="0" || rightValue_m.interprete!="0") 1 else 0
+    return value_m.toString
   }
 }
 object ValueOr {
@@ -184,22 +194,23 @@ object ValueOr {
 
 // Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
-  val value_m = v
+  val valuenot_m = v
 
   override def toString : String = {
-    "not(" + value_m.toString + ")"
+    "not(" + valuenot_m.toString + ")"
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
-    return (value_m=="0").toString
+    value_m = if (valuenot_m.interprete=="0") 1 else 0
+    return value_m.toString
   }
 
  
 }
 object ValueNot {
-  def unapply(vn : ValueNot): Option[Value] = Some(vn.value_m)
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.valuenot_m)
 }
