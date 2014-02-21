@@ -20,13 +20,13 @@ abstract class Term() {
 	var parenthesisCount = -1;   
 	var i = 0;
 	while(parenthesisCount != 0 || str.charAt(i) != ',') {
-	  if (str.charAt(i) == '(')
-	    parenthesisCount += 1;
-	  else if (str.charAt(i) == ')')
-	    parenthesisCount -= 1;
-	  i += 1;
-	}
-	return i
+  	  if (str.charAt(i) == '(')
+  	    parenthesisCount += 1;
+  	  else if (str.charAt(i) == ')')
+  	    parenthesisCount -= 1;
+  	  i += 1;
+  	}
+  	return i
   }
 }
 
@@ -71,7 +71,7 @@ case class TermPair(t1 : Term, t2 : Term) extends Term {
   val rightTerm_m = t2
 
   override def toString : String = {
-	return "Pair(" + leftTerm_m.toString() + "," + rightTerm_m.toString() + ")"
+	  return "Pair(" + leftTerm_m.toString() + "," + rightTerm_m.toString() + ")"
   }
 
   def interprete : String = {

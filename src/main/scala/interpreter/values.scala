@@ -8,16 +8,17 @@ import javax.crypto.Cipher;
 
 
 abstract case class Value() extends Term {
+  var value_m : Int
   def getValue : Int
 }
 
 // Extractor class for integer values
 class ValueInteger(v : Int) extends Value {
-  val value_m = v
+  value_m = v
 
 
   override def toString : String = {
-	 return value_m.toString
+   return value_m.toString
   }
 
   def getValue : Int = {
@@ -38,11 +39,11 @@ class ValueConst(s : String) extends Value {
   val identifier_m = s
 
   override def toString : String = {
-	 return identifier_m
+   return identifier_m
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
   def interprete : String = {
@@ -55,15 +56,15 @@ object ValueConst {
 
 
 // Extractor class for count values
-class ValueCount(l : TermList) extends Value {
+class ValueCount(l : Term) extends Value {
   val list_m = l
 
   override def toString : String = {
-  	"count(" + list_m.toString + ")"
+    "count(" + list_m.toString + ")"
   }
 
   def getValue : Int = { 
-    return 1
+    return value_m
   }
 
   def interprete : String = {
@@ -89,7 +90,7 @@ class ValueCount(l : TermList) extends Value {
   }
 }
 object ValueCount {
-  def unapply(vc : ValueCount): Option[TermList] = Some(vc.list_m)
+  def unapply(vc : ValueCount): Option[Term] = Some(vc.list_m)
 }
 
 
@@ -151,7 +152,7 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   }
 
   def interprete : String = {
-    return (leftValue_m.interprete!="0" && rightValue_m.interprete!="0").toString
+    return (leftValue_m.interprete!="0" && rightValue_m!="0").toString
   }
 }
 object ValueAnd {
@@ -173,7 +174,7 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   }
 
   def interprete : String = {
-    return (leftValue_m.interprete!="0" || rightValue_m.interprete!="0").toString
+    return (leftValue_m.interprete!="0" || rightValue_m!="0").toString
   }
 }
 object ValueOr {
@@ -194,7 +195,7 @@ class ValueNot(v : Value) extends Value {
   }
 
   def interprete : String = {
-    return (value_m.interprete=="0").toString
+    return (value_m=="0").toString
   }
 
  
@@ -202,5 +203,3 @@ class ValueNot(v : Value) extends Value {
 object ValueNot {
   def unapply(vn : ValueNot): Option[Value] = Some(vn.value_m)
 }
-
-

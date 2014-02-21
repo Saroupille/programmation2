@@ -21,4 +21,17 @@ object Test {
     println("Result expected : x::y::pair(x,y)::x::y::[]")
     println("Result          : "+list1.interprete)
   }
+
+  def parseTest() : Unit = {
+    def printTest (l : List[Proc]) : Unit = {
+        l match {
+            case Nil => println ("");
+            case t::q => println (t.toString()); printTest(q);
+        }
+    }
+
+    val parser = new Parser();
+    val l = parser.parseFile("testNSL.txt");
+    printTest(l);
+  }
 }
