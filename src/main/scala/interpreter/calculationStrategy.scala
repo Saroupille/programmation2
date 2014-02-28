@@ -21,14 +21,12 @@ class SynchroneousStrategy extends CalculationStrategy {
   }
 
   def read(sq:SynchronizedQueue[String]):String = {
-    val f: Future[String] = future(
-      sq.dequeue()
-    )
-    var truc=""
-    f onSuccess {
-      case msg => truc= msg
+    try {
+      return sq.dequeue()
     }
-    return truc
+    catch {
+      case _ : Throwable => read(sq)
+    }
   }
 }
 
