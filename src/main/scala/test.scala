@@ -39,9 +39,8 @@ object Test {
         }
     }
 
-    val parser = new Parser();
+    val parser = new Parser(new AsynchroneousStrategy());
     val l = parser.parseFile("testNSL.txt");
-    printTest(l);
     interpreteTest(l);
   }
 }

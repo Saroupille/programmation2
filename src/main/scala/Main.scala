@@ -4,7 +4,8 @@ import java.io.File
 //Class to parse the comand line
 case class Config(
 debug: Boolean = false,
-file: String = ""
+file: String = "",
+synch: Boolean = false
 )
 
 
@@ -29,8 +30,8 @@ object StandardMain {
       Test.interpretationTest();
       Test.parseTest();
     }
-    else
-      println("false")
+    val interpreter = new Interpreter(config.synch);
+    interpreter.interprete(config.file)
   }
 
 }

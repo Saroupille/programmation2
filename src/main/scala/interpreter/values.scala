@@ -51,7 +51,7 @@ class ValueConst(s : String) extends Value {
   def interprete(env : Map[String,String]) : String = {
     if (value_m == -1) {
       val rand = new Random();
-      value_m = rand.nextInt(10000000);
+      value_m = rand.nextInt(2);
     }
     return value_m.toString
   }
@@ -78,10 +78,16 @@ class ValueCount(l : Term) extends Value {
       val sep = parseStrPar(str, "::", 0);
       if(sep != -1) {
         val tail = str.substring(sep+2);
-        if(str.substring(0,sep) != "0")
-          return 1+aux(tail)
-        else
-          return aux(tail)
+        try {
+          val i = str.substring(0,sep).toInt;
+          if (i != 0)
+            return 1+aux(tail)
+          else
+            return aux(tail)
+        }
+        catch {
+          case _ : Throwable => return aux(tail)
+        }
       }
       else if (str.startsWith("[]"))
         return 0

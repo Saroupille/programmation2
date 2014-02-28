@@ -6,18 +6,14 @@
 
 import scala.collection.mutable.Map
 
-class Parser {
-	val strategy : CalculationStrategy = new AsynchroneousStrategy();
+class Parser (strat : CalculationStrategy) {
+	val strategy : CalculationStrategy = strat;
 
 	var constEnvironment : Map[String,ValueConst] = Map();
-	var chanEnvironment : Map[String, Channel] = Map();
+	var chanEnvironment : Map[String, Channel] = Map(); 
 
 	def resetConstEnvironment() = {
 		constEnvironment = Map();
-	}
-	def resetChanEnvironment() = {
-		chanEnvironment = Map();
-		chanEnvironment.put("stdout", new Channel("stdout", strategy));
 	}
 
 	def removeParenthesis(str : String) : String = {
@@ -128,6 +124,14 @@ class Parser {
 		else if(str.startsWith("count(")) {
 			val valueEnd = str.lastIndexOf(')');
 			val list = parseTerm(str.substring(6, valueEnd));
+			list match {
+				case TermList(l) => return new ValueCount(list);
+				case TermVariable(s) => return new ValueCount(list);
+				case _ => throw new parsingError("count() need a list or a variable parameter");
+			}
+		}
+		else if(str.startsWith("count")) {
+			val list = parseTerm(str.substring(5));
 			list match {
 				case TermList(l) => return new ValueCount(list);
 				case TermVariable(s) => return new ValueCount(list);
@@ -337,7 +341,6 @@ class Parser {
 		val strArray = str.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "").split("""\|\|""");
 		def parseAux (lstr : List[String]) : List[Proc]  = {
 			resetConstEnvironment();
-			resetChanEnvironment();
 			lstr match {
 				case List() => List()
 				case p::tail if p.matches(".*\\^[0-9]+") => {
