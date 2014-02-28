@@ -96,15 +96,6 @@ class Parser {
 		if (str.matches("[0-9]+")) {
 			return new ValueInteger(str.toInt);
 		}
-		else if(str.startsWith("count(")) {
-			val valueEnd = str.lastIndexOf(')');
-			val list = parseTerm(str.substring(6, valueEnd));
-			list match {
-				case TermList(l) => return new ValueCount(list);
-				case TermVariable(s) => return new ValueCount(list);
-				case _ => throw new parsingError("count() need a list or a variable parameter");
-			}
-		}
 		else if(str.startsWith("not(")) {
 			val valueEnd = str.lastIndexOf(')');
 			val res = parseValue(str.substring(4, valueEnd));
@@ -133,6 +124,15 @@ class Parser {
 			val leftV = parseValue(str.substring(0,cut));
 			val rightV = parseValue(str.substring(cut+2,str.length()));
 			return new ValueOr(leftV, rightV);
+		}
+		else if(str.startsWith("count(")) {
+			val valueEnd = str.lastIndexOf(')');
+			val list = parseTerm(str.substring(6, valueEnd));
+			list match {
+				case TermList(l) => return new ValueCount(list);
+				case TermVariable(s) => return new ValueCount(list);
+				case _ => throw new parsingError("count() need a list or a variable parameter");
+			}
 		}
 		else {
 			try {
@@ -235,16 +235,16 @@ class Parser {
 			val nextComma = str.indexOf(',');
 			val procEnd = str.indexOf(").");
 			val channelName = str.substring(3, nextComma);
-			val varName = parseTerm(str.substring(nextComma+1, procEnd));
+			val variable = str.substring(nextComma+1, procEnd);
 			val nextProc = parseProc(str.substring(procEnd+2));
 			try {
-				return new ProcIn(chanEnvironment(channelName), varName, nextProc);
+				return new ProcIn(chanEnvironment(channelName), variable, nextProc);
 			}
 			catch {
 				case _ : Throwable => {
 					val channel = new Channel(channelName, strategy);
 					chanEnvironment.put(channelName, channel);
-					return new ProcIn(channel, varName, nextProc);
+					return new ProcIn(channel, variable, nextProc);
 				}
 			}
 		}
@@ -259,7 +259,7 @@ class Parser {
 			val channelName = str.substring(begin+1, nextComma); // Parsing c
 			val functionArg = str.substring(nextComma+1, posArrow); // Parsing x
 			val functionRes = parseTerm(str.substring(posArrow+2, posAs)); // Parsing u
-			val variable = new TermVariable(str.substring(posAs+2,procEnd)); //Parsing y
+			val variable = str.substring(posAs+2,procEnd); //Parsing y
 
 			val nextProc = parseProc(str.substring(procEnd+2));
 			try {

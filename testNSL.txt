@@ -1,14 +1,1 @@
-(new na).out(c,enc(pair(na,a),pk(2))).in(c,x).
-     if (pi1(pi1(dec(x,sk(1)))) = na) /\ (pi2(dec(x,sk(1))) = b)
-     then out(c,enc(pi2(pi1(dec(x,sk(1)))),pk(2))).out(stdout,A_done).0
-     else 0
-|| 
-(new nb).in(c,x).
-     if (pi2(dec(x,sk(2))) = A)
-     then 
-     	  out(c,enc(pair(pair(pi1(dec(x,sk(2))),nb),b),pk(1))).in(c,y).
-	  if dec(y,sk(2))=nb
-	  then out(stdout,B_done)
-	  else 0
-     else
-	0
+out(chan, 0).out(chan, 1).out(chan, 1).in^3(chan, x -> pi1(pair(x,1)) as y).if count(y) = 2 then out(stdout, OK) else out(stdout, NONOK)

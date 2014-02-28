@@ -22,33 +22,47 @@ case class ProcZero() extends Proc {
   }
 }
 
-case class ProcIn(c : Channel, x : Term, p : Proc) extends Proc {
+case class ProcIn(c : Channel, x : String, p : Proc) extends Proc {
   val channel_m = c
   val store_m = x
   val procNext_m = p
 
   override def toString : String = {
-    return "in(" + channel_m.toString() + "," + store_m.toString() + ")." + procNext_m.toString()
+    return "in(" + channel_m.toString() + "," + store_m + ")." + procNext_m.toString()
   }
 
   def interprete(env : Map[String,String]) : Unit = {
-    
+    env.put(store_m, channel_m.read());
+    procNext_m.interprete(env);
   }
 }
 
-case class ProcInK(k : Int, c : Channel, x : String, u : Term, y : TermVariable, p : Proc) extends Proc {
+case class ProcInK(k : Int, c : Channel, x : String, u : Term, y : String, p : Proc) extends Proc {
   val channel_m = c
+  val iterate_m = k
   val functionArg_m = x
   val functionRes_m = u
   val variable_m = y
   val procNext_m = p
 
   override def toString : String = {
-    return "in^" + k + "(" + channel_m.toString() + "," + functionArg_m + " --> " + functionRes_m.toString() + " as " + variable_m.toString() + ")." + procNext_m.toString()
+    return "in^" + iterate_m + "(" + channel_m.toString() + "," + functionArg_m + " --> " + functionRes_m.toString() + " as " + variable_m + ")." + procNext_m.toString()
   }
 
   def interprete(env : Map[String,String]) : Unit = {
-    
+    def aux(iterations : Int) : String = {
+      if (iterations == 0) {
+        return "[]"
+      }
+      else {
+        var tmpEnv : Map[String,String] = Map();
+        tmpEnv.put(functionArg_m, channel_m.read());
+        val interpRes = functionRes_m.interprete(tmpEnv);
+        return interpRes + "::" + aux(iterations-1);
+      }
+    }
+    env.put(variable_m, aux(iterate_m));
+    p.interprete(env);
   }
 }
 
@@ -62,7 +76,8 @@ case class ProcOut(c : Channel, m : Term, p : Proc) extends Proc {
   }
 
   def interprete(env : Map[String,String]) : Unit = {
-    
+    channel_m.write(message_m.interprete(env));
+    procNext_m.interprete(env);
   }
 }
 

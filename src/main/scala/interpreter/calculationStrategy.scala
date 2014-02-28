@@ -4,6 +4,8 @@ import ExecutionContext.Implicits.global
 
 trait CalculationStrategy {
   def toString(): String;
+  def write(sq:SynchronizedQueue[String], out:String) : Unit
+  def read(sq:SynchronizedQueue[String]):String
 }
 
 
@@ -12,10 +14,8 @@ class SynchroneousStrategy extends CalculationStrategy {
   override def toString(): String = {
     return "Synchroneous"
   }
-}
 
-class AsynchroneousStrategy extends CalculationStrategy {
-  
+  //Pour l'instant j'ai juste copié collé la stratégie asynchrone pour éviter les problèmes d'abstract class..
   def write(sq:SynchronizedQueue[String], out:String) = {
     sq.enqueue(out)
   }
@@ -29,6 +29,32 @@ class AsynchroneousStrategy extends CalculationStrategy {
       case msg => truc= msg
     }
     return truc
+  }
+}
+
+class AsynchroneousStrategy extends CalculationStrategy {
+  
+  def write(sq:SynchronizedQueue[String], out:String) = {
+    sq.enqueue(out)
+  }
+
+  def read(sq:SynchronizedQueue[String]):String = {
+    /*val f: Future[String] = future {
+      sq.dequeue()
+    }
+
+    var temp = "err"
+    f onSuccess {
+      case msg => temp = msg
+    }
+
+    return temp*/
+    try {
+      return sq.dequeue()
+    }
+    catch {
+      case _ : Throwable => read(sq)
+    }
   }
 
   override def toString(): String = {

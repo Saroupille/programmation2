@@ -28,12 +28,20 @@ object Test {
     def printTest (l : List[Proc]) : Unit = {
         l match {
             case Nil => println ("");
-            case t::q => println (t.toString()); printTest(q);
+            case t::q => println(t.toString()); printTest(q)
+        }
+    }
+
+    def interpreteTest (l: List[Proc]) : Unit = {
+        l match {
+            case Nil => println ("End of interpretation");
+            case t::q => t.interprete(Map()); printTest(q)
         }
     }
 
     val parser = new Parser();
     val l = parser.parseFile("testNSL.txt");
     printTest(l);
+    interpreteTest(l);
   }
 }
