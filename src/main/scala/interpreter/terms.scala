@@ -7,26 +7,26 @@
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.nio.ByteBuffer;
+import scala.collection.mutable.Map
 
 abstract class Term() {
   def toString : String
-  def interprete : String
+  def interprete(env : Map[String,String]) : String
 
-  def parseComma(str : String) : Int = {
-	//parenthesisCount = 0 ssi on a vu autant de parenthèses ouvrantes que 
-    //fermantes (modulo la première ouvrante)
-
-    // Initialisé à -1 car on va parser la parenthèse ouvrante de Pair(
-	var parenthesisCount = -1;   
-	var i = 0;
-	while(parenthesisCount != 0 || str.charAt(i) != ',') {
-  	  if (str.charAt(i) == '(')
-  	    parenthesisCount += 1;
-  	  else if (str.charAt(i) == ')')
-  	    parenthesisCount -= 1;
-  	  i += 1;
-  	}
-  	return i
+  def parseStrPar(str : String, find : String, init : Int) : Int = {
+    var parenthesisCount = init;
+    var n = str.length();
+    var i = 0;
+    while((parenthesisCount != 0 || !str.substring(i).startsWith(find)) && i < n) {
+      if (str.charAt(i) == '(')
+        parenthesisCount += 1;
+      else if (str.charAt(i) == ')')
+        parenthesisCount -= 1;
+      i += 1;
+    }
+    if (i < n)
+      return i;
+    return -1;
   }
 }
 
@@ -37,8 +37,15 @@ case class TermVariable(v : String) extends Term {
 	return "Var("+variable_m+")"
   }
 
-  def interprete : String = {
-    return variable_m
+  def interprete(env : Map[String,String]) : String = {
+    try {
+      return env(variable_m);
+    }
+    catch {
+      case _ : Throwable => 
+        env.put(variable_m, variable_m); 
+        return variable_m
+    }
   }
 }
 
@@ -55,11 +62,11 @@ case class TermList(l: List[Term]) extends Term {
     "[" + listToString(list_m) + "]"
   }
 
-  def interprete : String = {
+  def interprete(env : Map[String,String]) : String = {
     def aux(l : List[Term]) : String = {
       l match {
         case List() => "[]"
-        case head :: tail =>  head.interprete + "::" + aux(tail)
+        case head :: tail =>  head.interprete(env) + "::" + aux(tail)
       }
     }
     return aux(list_m)
@@ -74,8 +81,8 @@ case class TermPair(t1 : Term, t2 : Term) extends Term {
 	  return "Pair(" + leftTerm_m.toString() + "," + rightTerm_m.toString() + ")"
   }
 
-  def interprete : String = {
-    return "pair("+leftTerm_m.interprete+","+rightTerm_m.interprete+")"
+  def interprete(env : Map[String,String]) : String = {
+    return "pair("+leftTerm_m.interprete(env)+","+rightTerm_m.interprete(env)+")"
   }
 }
 
@@ -86,10 +93,10 @@ case class TermProj1(t : Term) extends Term {
     return "Proj1("+t.toString()+")"
   }
 
-  def interprete : String = {
-    val tmp = term_m.interprete
+  def interprete(env : Map[String,String]) : String = {
+    val tmp = term_m.interprete(env)
     if(tmp.startsWith("pair("))
-      return tmp.substring(5,parseComma(tmp))
+      return tmp.substring(5,parseStrPar(tmp, ",", -1))
     else
       return "err"
   }
@@ -103,10 +110,10 @@ case class TermProj2(t : Term) extends Term {
     return "Proj2("+t.toString()+")"
   }
 
-  def interprete : String = {
-    val tmp = term_m.interprete
+  def interprete(env : Map[String,String]) : String = {
+    val tmp = term_m.interprete(env)
     if(tmp.startsWith("pair(")) 
-      return tmp.substring(parseComma(tmp)+1,tmp.lastIndexOf(")"))
+      return tmp.substring(parseStrPar(tmp, ",", -1)+1,tmp.lastIndexOf(")"))
     else
       return "err"   
   }
@@ -121,8 +128,8 @@ case class TermEncode(msg : Term, key : Term) extends Term {
     return "Encode("+msg_m.toString()+","+key_m.toString()+")"
   }
 
-  def interprete : String = {
-    return "enc("+msg_m.interprete+","+key_m.interprete+")"
+  def interprete(env : Map[String,String]) : String = {
+    return "enc("+msg_m.interprete(env)+","+key_m.interprete(env)+")"
   }
 }
 
@@ -135,12 +142,12 @@ case class TermDecode(cypher: Term, key : Term) extends Term {
     return "Decode("+cypher_m.toString()+","+key_m.toString()+")"
   }
   
-  def interprete : String = {
-    val u=cypher.interprete
+  def interprete(env : Map[String,String]) : String = {
+    val u=cypher.interprete(env)
     if(u.startsWith("enc(")) { 
-      val u1=u.substring(4,parseComma(u))
-      val pk=u.substring(parseComma(u)+1,u.lastIndexOf(")"))
-      val sk=key_m.interprete
+      val u1=u.substring(4,parseStrPar(u, ",", -1))
+      val pk=u.substring(parseStrPar(u, ",", -1)+1,u.lastIndexOf(")"))
+      val sk=key_m.interprete(env)
       if(pk.startsWith("pk(")) {
         val n = pk.substring(3,pk.lastIndexOf(")"))
         if(sk.startsWith("sk(")) {
@@ -191,9 +198,9 @@ case class TermPublicKey(v: Value) extends Term {
     return "PublicKey("+publicKey_m.toString()+")"
   }
 
-  def interprete : String = {
+  def interprete(env : Map[String,String]) : String = {
     try {
-      return "pk("+publicKey_m.interprete+")"
+      return "pk("+publicKey_m.interprete(env)+")"
     } catch {
       case e:Exception=>{
         return "err"
@@ -226,9 +233,9 @@ case class TermSecretKey(v: Value) extends Term {
   }
   */
 
-  def interprete : String = {
+  def interprete(env : Map[String,String]) : String = {
     try {
-      return "sk("+privateKey_m.interprete.toInt+")"
+      return "sk("+privateKey_m.interprete(env).toInt+")"
     } catch {
       case e:Exception=>{
         return "err"

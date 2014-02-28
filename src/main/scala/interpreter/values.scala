@@ -5,15 +5,18 @@
   */
 
 import javax.crypto.Cipher;
+import util.Random;
+import scala.collection.mutable.Map
 
 
 abstract case class Value() extends Term {
   def getValue : Int
+  var value_m : Int = -1
 }
 
 // Extractor class for integer values
 class ValueInteger(v : Int) extends Value {
-  val value_m = v
+  value_m = v
 
 
   override def toString : String = {
@@ -24,7 +27,7 @@ class ValueInteger(v : Int) extends Value {
     return value_m
   }
 
-  def interprete : String = {
+  def interprete(env : Map[String,String]) : String = {
     return value_m.toString
   }
 }
@@ -42,11 +45,15 @@ class ValueConst(s : String) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return identifier_m
+  def interprete(env : Map[String,String]) : String = {
+    if (value_m == -1) {
+      val rand = new Random();
+      value_m = rand.nextInt(10000000);
+    }
+    return value_m.toString
   }
 }
 object ValueConst {
@@ -63,28 +70,33 @@ class ValueCount(l : Term) extends Value {
   }
 
   def getValue : Int = { 
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    def aux( l:List[Term]) : String = {
-      l match {
-        case List() => "0"
-        case head::tail => try {
-          val h = head.interprete.toInt
-          if (h==0)
-            aux(tail)
-          else
-            1+aux(tail)
-        } catch {
-          case e:Exception=>{
-            aux(tail)
-          }
-        }
+  def interprete(env : Map[String,String]) : String = {
+    def aux (str:String) : Int = { 
+      val sep = parseStrPar(str, "::", 0);
+      if(sep != -1) {
+        val tail = str.substring(sep+2);
+        if(str.substring(0,sep) != "0")
+          return 1+aux(tail)
+        else
+          return aux(tail)
       }
+      else if (str.startsWith("[]"))
+        return 0
+      else  
+        throw new interpretationError("This is not a list")
     }
-    list_m match {
-      case TermList(l) => return aux(l)
+    val tmp = list_m.interprete(env);
+    try {
+      value_m = aux(tmp);
+      return value_m.toString
+    }
+    catch {
+      case e:Exception=>{
+        return "err"
+      }
     }
   }
 }
@@ -103,11 +115,12 @@ class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return if (leftValue_m.interprete.toInt > rightValue_m.interprete.toInt) "1" else "0"
+  def interprete(env : Map[String,String]) : String = {
+    value_m = if (leftValue_m.interprete(env).toInt > rightValue_m.interprete(env).toInt) 1 else 0
+    return value_m.toString
   }
 }
 object ValueSuperior {
@@ -125,11 +138,12 @@ class ValueEqual(leftv : Term, rightv : Term) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return (leftTerm_m.interprete==rightTerm_m.interprete).toString
+  def interprete(env : Map[String,String]) : String = {
+    value_m = if (leftTerm_m.interprete(env)==rightTerm_m.interprete(env)) 1 else 0
+    return value_m.toString
   }
 }
 object ValueEqual {
@@ -147,11 +161,12 @@ class ValueAnd(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return (leftValue_m.interprete!="0" && rightValue_m.interprete!="0").toString
+  def interprete(env : Map[String,String]) : String = {
+    value_m = if (leftValue_m.interprete(env)!="0" && rightValue_m.interprete(env)!="0") 1 else 0
+    return value_m.toString;
   }
 }
 object ValueAnd {
@@ -169,11 +184,12 @@ class ValueOr(leftv : Value, rightv : Value) extends Value {
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return (leftValue_m.interprete!="0" || rightValue_m.interprete!="0").toString
+  def interprete(env : Map[String,String]) : String = {
+    value_m = if (leftValue_m.interprete(env)!="0" || rightValue_m.interprete(env)!="0") 1 else 0
+    return value_m.toString
   }
 }
 object ValueOr {
@@ -183,22 +199,23 @@ object ValueOr {
 
 // Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
-  val value_m = v
+  val valuenot_m = v
 
   override def toString : String = {
-    "not(" + value_m.toString + ")"
+    "not(" + valuenot_m.toString + ")"
   }
 
   def getValue : Int = {
-    return 1
+    return value_m
   }
 
-  def interprete : String = {
-    return (value_m.interprete=="0").toString
+  def interprete(env : Map[String,String]) : String = {
+    value_m = if (valuenot_m.interprete(env)=="0") 1 else 0
+    return value_m.toString
   }
 
  
 }
 object ValueNot {
-  def unapply(vn : ValueNot): Option[Value] = Some(vn.value_m)
+  def unapply(vn : ValueNot): Option[Value] = Some(vn.valuenot_m)
 }

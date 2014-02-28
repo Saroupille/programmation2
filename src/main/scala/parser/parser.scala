@@ -4,35 +4,20 @@
 * Copyright (c) 2014 GPLv3. See LICENCE file
 */
 
+import scala.collection.mutable.Map
+
 class Parser {
-	var constEnvironment : List[(String, ValueConst)] = List();
+	val strategy : CalculationStrategy = new AsynchroneousStrategy();
 
-	def resetEnvironment() = {
-		constEnvironment = List();
+	var constEnvironment : Map[String,ValueConst] = Map();
+	var chanEnvironment : Map[String, Channel] = Map();
+
+	def resetConstEnvironment() = {
+		constEnvironment = Map();
 	}
-
-	def addToEnvironment(str: String, v : ValueConst) = {
-		constEnvironment = (str,v)::constEnvironment;
-	}
-
-	def isInEnvironment(str:String) : Boolean = {
-		def fun_aux(str:String, l:List[(String, ValueConst)]) : Boolean = {
-			l match {
-				case List() => false
-				case (h,v)::t => (h == str) || fun_aux(str,t)
-			}
-		}
-		fun_aux(str,constEnvironment);
-	}
-
-	def getOfEnvironment(str:String) : ValueConst = {
-		def fun_aux(str:String, l:List[(String, ValueConst)]) : ValueConst = {
-			l match {
-				case List() => throw new parsingError("Unexpected error");
-				case (h,v)::t => if (h == str) {return v;} else {fun_aux(str,t);}
-			}
-		}
-		fun_aux(str,constEnvironment);
+	def resetChanEnvironment() = {
+		chanEnvironment = Map();
+		chanEnvironment.put("stdout", new Channel("stdout", strategy));
 	}
 
 	def removeParenthesis(str : String) : String = {
@@ -149,12 +134,16 @@ class Parser {
 			val rightV = parseValue(str.substring(cut+2,str.length()));
 			return new ValueOr(leftV, rightV);
 		}
-		else if(isInEnvironment(str)) {
-			return getOfEnvironment(str);
-		}
 		else {
-			val exc = str + " is not a value. Maybe you should try to define it with new";
-			throw new parsingError(exc);
+			try {
+				return constEnvironment(str)
+			}
+			catch {
+				case _ : Throwable => {
+					val exc = str + " is not a value. Maybe you should try to define it with new";
+					throw new parsingError(exc);
+				}
+			}
 		}
 	}
 
@@ -245,28 +234,61 @@ class Parser {
 		if (str.startsWith("in(")) {
 			val nextComma = str.indexOf(',');
 			val procEnd = str.indexOf(").");
-			val channel = str.substring(3, nextComma);
+			val channelName = str.substring(3, nextComma);
 			val varName = parseTerm(str.substring(nextComma+1, procEnd));
 			val nextProc = parseProc(str.substring(procEnd+2));
-			return new ProcIn(channel, varName, nextProc);
+			try {
+				return new ProcIn(chanEnvironment(channelName), varName, nextProc);
+			}
+			catch {
+				case _ : Throwable => {
+					val channel = new Channel(channelName, strategy);
+					chanEnvironment.put(channelName, channel);
+					return new ProcIn(channel, varName, nextProc);
+				}
+			}
 		}
-		else if (str.startsWith("in^")) {
-			val begin = str.indexOf('(');
+		else if (str.startsWith("in^")) { // Parsing in^k(c, x -> u as y)
+			val begin = str.indexOf('('); // Positions of delimiters ( , -> ). and "as"
 			val nextComma = str.indexOf(',');
 			val procEnd = str.indexOf(").");
-			val number = str.substring(3, begin).toInt;
-			val channel = str.substring(begin+1, nextComma);
-			val function = str.substring(nextComma+1, procEnd);
+			val posAs = parseStrPar(str, "as", -1);
+			val posArrow = parseStrPar(str, "->", -1);
+
+			val number = str.substring(3, begin).toInt; // Parsing k
+			val channelName = str.substring(begin+1, nextComma); // Parsing c
+			val functionArg = str.substring(nextComma+1, posArrow); // Parsing x
+			val functionRes = parseTerm(str.substring(posArrow+2, posAs)); // Parsing u
+			val variable = new TermVariable(str.substring(posAs+2,procEnd)); //Parsing y
+
 			val nextProc = parseProc(str.substring(procEnd+2));
-			return new ProcInK(number, channel, function, nextProc);
+			try {
+				return new ProcInK(number, chanEnvironment(channelName), functionArg, functionRes, variable, nextProc);
+			}
+			catch {
+				case _ : Throwable => {
+					val channel = new Channel(channelName, strategy);
+					chanEnvironment.put(channelName, channel);
+					return new ProcInK(number, channel, functionArg, functionRes, variable, nextProc);
+				}
+			}
 		}
 		else if (str.startsWith("out(")) {
 			val nextComma = str.indexOf(',');
 			val procEnd = str.indexOf(").");
-			val channel = str.substring(4, nextComma);
+			val channelName = str.substring(4, nextComma);
 			val message = parseTerm(str.substring(nextComma+1, procEnd));
 			val nextProc = parseProc(str.substring(procEnd+2));
-			return new ProcOut(channel, message, nextProc);
+			try {
+				return new ProcOut(chanEnvironment(channelName), message, nextProc);
+			}
+			catch {
+				case _ : Throwable => {
+					val channel = new Channel(channelName, strategy);
+					chanEnvironment.put(channelName, channel);
+					return new ProcOut(channel, message, nextProc);
+				}
+			}
 		}
 		else if (str.startsWith("if")) {
 			val thenPos = str.indexOf("then");
@@ -279,7 +301,7 @@ class Parser {
 		else if (str.startsWith("new")) {
 			val endNew = str.indexOf('.');
 			val nomVar = new ValueConst(str.substring(3, endNew));
-			addToEnvironment(str.substring(3,endNew), nomVar);
+			constEnvironment.put(str.substring(3,endNew), nomVar);
 			val nextProc = parseProc(str.substring(endNew + 1));
 			return new ProcNew(nomVar, nextProc);
 		}
@@ -314,7 +336,8 @@ class Parser {
 	def parse(str : String) : List[Proc] = {
 		val strArray = str.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "").split("""\|\|""");
 		def parseAux (lstr : List[String]) : List[Proc]  = {
-			resetEnvironment();
+			resetConstEnvironment();
+			resetChanEnvironment();
 			lstr match {
 				case List() => List()
 				case p::tail if p.matches(".*\\^[0-9]+") => {

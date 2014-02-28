@@ -1,3 +1,5 @@
+import scala.collection.mutable.Map
+
 object Test {
 
   def interpretationTest() : Unit = { 
@@ -6,20 +8,20 @@ object Test {
     println("###################")
     val x= TermVariable("x")
     println("Result expected : x")
-    println("Result          : "+x.interprete)
+    println("Result          : "+x.interprete(Map()))
     val y= TermVariable("y")
     val pair1= TermPair(x,y)
     println("Result expected : pair(x,y)")
-    println("Result          : "+pair1.interprete)
+    println("Result          : "+pair1.interprete(Map()))
     val proj1=TermProj1(pair1)
     println("Result expected : x")
-    println("Result          : "+proj1.interprete)
+    println("Result          : "+proj1.interprete(Map()))
     val proj2=TermProj2(pair1)
     println("Result expected : y")
-    println("Result          : "+proj2.interprete)
+    println("Result          : "+proj2.interprete(Map()))
     val list1=TermList(List(x,y,pair1,proj1,proj2))
     println("Result expected : x::y::pair(x,y)::x::y::[]")
-    println("Result          : "+list1.interprete)
+    println("Result          : "+list1.interprete(Map()))
   }
 
   def parseTest() : Unit = {
