@@ -4,8 +4,8 @@
   * Copyright (c) 2014 GPLv3. See LICENCE file
   */
 
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
+//import java.security.KeyPairGenerator;
+//import java.security.SecureRandom;
 import java.nio.ByteBuffer;
 import scala.collection.mutable.Map
 
@@ -121,7 +121,6 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
       }
     }
     return "err"
-    
   }
 }
 

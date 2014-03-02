@@ -18,7 +18,6 @@ abstract case class Value() extends Term {
 class ValueInteger(v : Int) extends Value {
   value_m = v
 
-
   override def toString : String = {
    return value_m.toString
   }
@@ -35,8 +34,6 @@ object ValueInteger {
   def unapply(vi : ValueInteger): Option[Int] = Some(vi.value_m)
 }
 
-
-// Extractor class for constant values
 class ValueConst(s : String) extends Value {
   val identifier_m = s
 
@@ -60,8 +57,6 @@ object ValueConst {
   def unapply(vc : ValueConst): Option[String] = Some(vc.identifier_m)
 }
 
-
-// Extractor class for count values
 class ValueCount(l : Term) extends Value {
   val list_m = l
 
@@ -75,7 +70,7 @@ class ValueCount(l : Term) extends Value {
 
   def interprete(env : Map[String,String]) : String = {
     def aux (str:String) : Int = { 
-      val sep = parseStrPar(str, "::", 0);
+      val sep = Term.parseStrPar(str, "::", 0);
       if(sep != -1) {
         val tail = str.substring(sep+2);
         try {
@@ -111,7 +106,6 @@ object ValueCount {
 }
 
 
-// Extractor class for value V > V'
 class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -134,7 +128,6 @@ object ValueSuperior {
 }
 
 
-// Extractor class for value V = V'
 class ValueEqual(leftv : Term, rightv : Term) extends Value {
   val leftTerm_m = leftv
   val rightTerm_m = rightv 
@@ -157,7 +150,6 @@ object ValueEqual {
 }
 
 
-// Extractor class for value V /\ V'
 class ValueAnd(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -180,7 +172,6 @@ object ValueAnd {
 }
 
 
-// Extractor class for value V \/ V'
 class ValueOr(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -203,7 +194,6 @@ object ValueOr {
 }
 
 
-// Extractor class for value not(V)
 class ValueNot(v : Value) extends Value {
   val valuenot_m = v
 
