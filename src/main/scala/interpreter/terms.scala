@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 import scala.collection.mutable.Map
 
 abstract class Term() {
-  def toString : String
   def interprete(env : Map[String,String]) : String
-
+}
+object Term {
   def parseStrPar(str : String, find : String, init : Int) : Int = {
     var parenthesisCount = init;
     var n = str.length();
@@ -30,18 +30,13 @@ abstract class Term() {
   }
 }
 
-case class TermVariable(v : String) extends Term {
-  val variable_m = v
-
-  override def toString : String = {
-	return "Var("+variable_m+")"
-  }
+case class TermVariable(variable_m : String) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     try {
       return env(variable_m);
     }
-    catch {
+    catch {//The variable is not in the environnement
       case _ : Throwable => 
         env.put(variable_m, variable_m); 
         return variable_m
@@ -49,18 +44,7 @@ case class TermVariable(v : String) extends Term {
   }
 }
 
-case class TermList(l: List[Term]) extends Term {
-  val list_m=l
-
-  override def toString : String = {
-    def listToString(l : List[Term]) : String =  {
-      l match {
-        case head :: tail =>  head.toString + "," + listToString(tail)
-        case List() => "0"
-      }
-    }
-    "[" + listToString(list_m) + "]"
-  }
+case class TermList(list_m: List[Term]) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     def aux(l : List[Term]) : String = {
@@ -73,80 +57,51 @@ case class TermList(l: List[Term]) extends Term {
   }
 }
 
-case class TermPair(t1 : Term, t2 : Term) extends Term {
-  val leftTerm_m = t1
-  val rightTerm_m = t2
-
-  override def toString : String = {
-	  return "Pair(" + leftTerm_m.toString() + "," + rightTerm_m.toString() + ")"
-  }
-
+case class TermPair(leftTerm_m : Term, rightTerm_m : Term) extends Term {
+  
   def interprete(env : Map[String,String]) : String = {
     return "pair("+leftTerm_m.interprete(env)+","+rightTerm_m.interprete(env)+")"
   }
 }
 
-case class TermProj1(t : Term) extends Term {
-  val term_m=t
-
-  override def toString : String = {
-    return "Proj1("+t.toString()+")"
-  }
+case class TermProj1(term_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     val tmp = term_m.interprete(env)
     if(tmp.startsWith("pair("))
-      return tmp.substring(5,parseStrPar(tmp, ",", -1))
+      return tmp.substring(5,Term.parseStrPar(tmp, ",", -1))
     else
       return "err"
   }
 }
 
 
-case class TermProj2(t : Term) extends Term {
-  val term_m=t
-
-  override def toString : String = {
-    return "Proj2("+t.toString()+")"
-  }
+case class TermProj2(term_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     val tmp = term_m.interprete(env)
     if(tmp.startsWith("pair(")) 
-      return tmp.substring(parseStrPar(tmp, ",", -1)+1,tmp.lastIndexOf(")"))
+      return tmp.substring(Term.parseStrPar(tmp, ",", -1)+1,tmp.lastIndexOf(")"))
     else
       return "err"   
   }
 }
 
 
-case class TermEncode(msg : Term, key : Term) extends Term {
-  val msg_m=msg
-  val key_m=key
-
-  override def toString : String = {
-    return "Encode("+msg_m.toString()+","+key_m.toString()+")"
-  }
+case class TermEncode(msg_m : Term, key_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     return "enc("+msg_m.interprete(env)+","+key_m.interprete(env)+")"
   }
 }
 
-case class TermDecode(cypher: Term, key : Term) extends Term {
-
-  val cypher_m=cypher
-  val key_m=key
-
-  override def toString : String = {
-    return "Decode("+cypher_m.toString()+","+key_m.toString()+")"
-  }
+case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
   
   def interprete(env : Map[String,String]) : String = {
-    val u=cypher.interprete(env)
+    val u=cypher_m.interprete(env)
     if(u.startsWith("enc(")) { 
-      val u1=u.substring(4,parseStrPar(u, ",", -1))
-      val pk=u.substring(parseStrPar(u, ",", -1)+1,u.lastIndexOf(")"))
+      val u1=u.substring(4,Term.parseStrPar(u, ",", -1))
+      val pk=u.substring(Term.parseStrPar(u, ",", -1)+1,u.lastIndexOf(")"))
       val sk=key_m.interprete(env)
       if(pk.startsWith("pk(")) {
         val n = pk.substring(3,pk.lastIndexOf(")"))
@@ -171,8 +126,7 @@ case class TermDecode(cypher: Term, key : Term) extends Term {
 }
 
 
-case class TermPublicKey(v: Value) extends Term {
-  val publicKey_m=v
+case class TermPublicKey(publicKey_m: Value) extends Term {
   /*
   val publicKey_m={
     var seed=0
@@ -194,9 +148,6 @@ case class TermPublicKey(v: Value) extends Term {
     return publicKey_m
   }
    */
-  override def toString : String = {
-    return "PublicKey("+publicKey_m.toString()+")"
-  }
 
   def interprete(env : Map[String,String]) : String = {
     try {
@@ -211,8 +162,8 @@ case class TermPublicKey(v: Value) extends Term {
 }
 
 
-case class TermSecretKey(v: Value) extends Term {
-  val privateKey_m=v
+case class TermSecretKey(privateKey_m: Value) extends Term {
+
   /*
   val privateKey_m={ //See TermPublicKey
     var seed=0
@@ -242,9 +193,6 @@ case class TermSecretKey(v: Value) extends Term {
       }
     }
     return "err"
-  }
-  override def toString : String = {
-    return "SecretKey("+privateKey_m.toString()+")"
   }
 }
 
