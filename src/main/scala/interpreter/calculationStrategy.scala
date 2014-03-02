@@ -2,10 +2,11 @@ import scala.collection.mutable.SynchronizedQueue
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
+
 trait CalculationStrategy {
   def toString(): String;
-  def write(sq:SynchronizedQueue[String], out:String) : Unit
-  def read(sq:SynchronizedQueue[String]):String
+  def write(sq:SynchronizedQueue[String], out:String, lockRead : Object, lockWrite : Object) : Unit
+  def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String
 }
 
 
@@ -15,43 +16,50 @@ class SynchroneousStrategy extends CalculationStrategy {
     return "Synchroneous"
   }
 
-  //Pour l'instant j'ai juste copié collé la stratégie asynchrone pour éviter les problèmes d'abstract class..
-  def write(sq:SynchronizedQueue[String], out:String) = {
-    sq.enqueue(out)
+  def write(sq:SynchronizedQueue[String], out:String, lockRead : Object, lockWrite : Object) = {
+    lockWrite.synchronized {
+      while(sq.length >= 1)
+        lockWrite.wait()
+    }
+    lockRead.synchronized {
+      sq.enqueue(out);
+      lockRead.notify();
+      lockRead.wait()
+    }
   }
 
-  def read(sq:SynchronizedQueue[String]):String = {
-    try {
-      return sq.dequeue()
+  def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String = {
+    var res = "";
+    lockRead.synchronized {
+      while(sq.length == 0)
+        lockRead.wait();
+      res = sq.dequeue();
+      lockRead.notifyAll()
     }
-    catch {
-      case _ : Throwable => read(sq)
+    lockWrite.synchronized {
+      lockWrite.notify();
+      return res
     }
   }
 }
 
 class AsynchroneousStrategy extends CalculationStrategy {
-  
-  def write(sq:SynchronizedQueue[String], out:String) = {
-    sq.enqueue(out)
+
+  def write(sq:SynchronizedQueue[String], out:String, lockRead : Object, lockWrite : Object) = {
+    lockRead.synchronized {
+      sq.enqueue(out);
+      lockRead.notify();
+    }
+    lockWrite.synchronized { //Ici on se synchronise sur lockWrite juste pour attendre 10ms et éviter des "race conditions"
+      lockWrite.wait(10);
+    }
   }
 
-  def read(sq:SynchronizedQueue[String]):String = {
-    /*val f: Future[String] = future {
-      sq.dequeue()
-    }
-
-    var temp = "err"
-    f onSuccess {
-      case msg => temp = msg
-    }
-
-    return temp*/
-    try {
+  def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String = {
+    lockRead.synchronized {
+      while(sq.length == 0)
+        lockRead.wait();
       return sq.dequeue()
-    }
-    catch {
-      case _ : Throwable => read(sq)
     }
   }
 
