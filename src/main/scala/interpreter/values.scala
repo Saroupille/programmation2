@@ -14,6 +14,7 @@ abstract case class Value() extends Term {
   var value_m : Int = -1
 }
 
+
 // Extractor class for integer values
 class ValueInteger(v : Int) extends Value {
   value_m = v
@@ -34,6 +35,7 @@ object ValueInteger {
   def unapply(vi : ValueInteger): Option[Int] = Some(vi.value_m)
 }
 
+
 class ValueConst(s : String) extends Value {
   val identifier_m = s
 
@@ -48,7 +50,7 @@ class ValueConst(s : String) extends Value {
   def interprete(env : Map[String,String]) : String = {
     if (value_m == -1) {
       val rand = new Random();
-      value_m = rand.nextInt(2);
+      value_m = rand.nextInt(Int.MaxValue);
     }
     return value_m.toString
   }
@@ -56,6 +58,7 @@ class ValueConst(s : String) extends Value {
 object ValueConst {
   def unapply(vc : ValueConst): Option[String] = Some(vc.identifier_m)
 }
+
 
 class ValueCount(l : Term) extends Value {
   val list_m = l
@@ -104,6 +107,7 @@ class ValueCount(l : Term) extends Value {
 object ValueCount {
   def unapply(vc : ValueCount): Option[Term] = Some(vc.list_m)
 }
+
 
 
 class ValueSuperior(leftv : Value, rightv : Value) extends Value {
@@ -209,8 +213,6 @@ class ValueNot(v : Value) extends Value {
     value_m = if (valuenot_m.interprete(env)=="0") 1 else 0
     return value_m.toString
   }
-
- 
 }
 object ValueNot {
   def unapply(vn : ValueNot): Option[Value] = Some(vn.valuenot_m)

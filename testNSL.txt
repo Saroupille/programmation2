@@ -1,1 +1,0 @@
-out(chan, 0).out(chan, 1).out(chan, 1).in^3(chan, x -> pi1(pair(x,1)) as y).if count(y) = 2 then out(stdout, OK) else out(stdout, NONOK)

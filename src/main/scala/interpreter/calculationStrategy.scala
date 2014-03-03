@@ -50,9 +50,6 @@ class AsynchroneousStrategy extends CalculationStrategy {
       sq.enqueue(out);
       lockRead.notify();
     }
-    lockWrite.synchronized { //Ici on se synchronise sur lockWrite juste pour attendre 10ms et éviter des "race conditions"
-      lockWrite.wait(10);
-    }
   }
 
   def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String = {
