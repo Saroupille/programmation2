@@ -10,21 +10,21 @@ import scala.collection.mutable.SynchronizedQueue
 class Channel(name : String, strategy:CalculationStrategy) {
   val strategy_m = strategy
   val name_m = name
-  val queue = new SynchronizedQueue[String]()
+  val queue_m = new SynchronizedQueue[String]()
 
   // Locks must be created by the channel, because the strategy is shared by all channels
-  val lockRead : Object = new Object();  
-  val lockWrite : Object = new Object();
+  val lockRead_m : Object = new Object();  
+  val lockWrite_m : Object = new Object();
 
   def read() : String = {
-    return strategy_m.read(queue, lockRead, lockWrite);
+    return strategy_m.read(queue_m, lockRead_m, lockWrite_m);
   }
 
   def write(str : String) : Unit = {
   	if(name_m == "stdout")
   		println(str);
     else {
-      strategy_m.write(queue, str, lockRead, lockWrite);
+      strategy_m.write(queue_m, str, lockRead_m, lockWrite_m);
     }
   }
 
