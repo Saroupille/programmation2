@@ -2,7 +2,7 @@
   * values.scala - Definitions of different case classes to represent a value
   * @author Lanvin Victor Thiré François
   * Copyright (c) 2014 GPLv3. See LICENCE file
-  */
+*/
 
 import javax.crypto.Cipher;
 import util.Random;
@@ -36,6 +36,8 @@ object ValueInteger {
 }
 
 
+
+//Extractor class for const values
 class ValueConst(s : String) extends Value {
   val identifier_m = s
 
@@ -48,7 +50,8 @@ class ValueConst(s : String) extends Value {
   }
 
   def interprete(env : Map[String,String]) : String = {
-    if (value_m == -1) {
+    //We generate a new random value iff it has not been generated before
+    if (value_m == -1) { 
       val rand = new Random();
       value_m = rand.nextInt(Int.MaxValue);
     }
@@ -60,6 +63,7 @@ object ValueConst {
 }
 
 
+//Extractor class for count
 class ValueCount(l : Term) extends Value {
   val list_m = l
 
@@ -72,7 +76,8 @@ class ValueCount(l : Term) extends Value {
   }
 
   def interprete(env : Map[String,String]) : String = {
-    def aux (str:String) : Int = { 
+
+    def aux (str:String) : Int = {  //Auxiliary recursive function
       val sep = Term.parseStrPar(str, "::", 0);
       if(sep != -1) {
         val tail = str.substring(sep+2);
@@ -92,6 +97,7 @@ class ValueCount(l : Term) extends Value {
       else  
         throw new interpretationError("This is not a list")
     }
+
     val tmp = list_m.interprete(env);
     try {
       value_m = aux(tmp);
@@ -109,7 +115,7 @@ object ValueCount {
 }
 
 
-
+//Extractor class for > comparison
 class ValueSuperior(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -132,6 +138,8 @@ object ValueSuperior {
 }
 
 
+
+//Extractor class for = comparison
 class ValueEqual(leftv : Term, rightv : Term) extends Value {
   val leftTerm_m = leftv
   val rightTerm_m = rightv 
@@ -154,6 +162,8 @@ object ValueEqual {
 }
 
 
+
+//Extractor class for && operator
 class ValueAnd(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -176,6 +186,7 @@ object ValueAnd {
 }
 
 
+//Extractor class for || operator
 class ValueOr(leftv : Value, rightv : Value) extends Value {
   val leftValue_m = leftv
   val rightValue_m = rightv 
@@ -198,6 +209,7 @@ object ValueOr {
 }
 
 
+//Extractor class for not operator
 class ValueNot(v : Value) extends Value {
   val valuenot_m = v
 

@@ -1,8 +1,8 @@
 /**
-  * values.scala - Definitions of different case classes to represent a value
+  * terms.scala - Definition of different case classes to represent a term
   * @author Lanvin Victor Thiré François
   * Copyright (c) 2014 GPLv3. See LICENCE file
-  */
+*/
 
 //import java.security.KeyPairGenerator;
 //import java.security.SecureRandom;
@@ -13,6 +13,8 @@ abstract class Term() {
   def interprete(env : Map[String,String]) : String
 }
 object Term {
+  //Function used in the parser, return the first ocurrence of the string 'find' in 'str' that 
+  //is inside -init parenthesis
   def parseStrPar(str : String, find : String, init : Int) : Int = {
     var parenthesisCount = init;
     var n = str.length();
@@ -30,13 +32,15 @@ object Term {
   }
 }
 
+
+//Variable
 case class TermVariable(variable_m : String) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
     try {
       return env(variable_m);
     }
-    catch {//The variable is not in the environnement
+    catch {//The variable is not in the environnement, we add the corresponding string
       case _ : Throwable => 
         env.put(variable_m, variable_m); 
         return variable_m
@@ -44,6 +48,9 @@ case class TermVariable(variable_m : String) extends Term {
   }
 }
 
+
+
+//List
 case class TermList(list_m: List[Term]) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
@@ -57,6 +64,9 @@ case class TermList(list_m: List[Term]) extends Term {
   }
 }
 
+
+
+//Pair(a,b)
 case class TermPair(leftTerm_m : Term, rightTerm_m : Term) extends Term {
   
   def interprete(env : Map[String,String]) : String = {
@@ -64,6 +74,9 @@ case class TermPair(leftTerm_m : Term, rightTerm_m : Term) extends Term {
   }
 }
 
+
+
+//Proj1(T)
 case class TermProj1(term_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
@@ -76,6 +89,7 @@ case class TermProj1(term_m : Term) extends Term {
 }
 
 
+//Proj2(T)
 case class TermProj2(term_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
@@ -88,6 +102,7 @@ case class TermProj2(term_m : Term) extends Term {
 }
 
 
+//Enc(m,k)
 case class TermEncode(msg_m : Term, key_m : Term) extends Term {
 
   def interprete(env : Map[String,String]) : String = {
@@ -95,8 +110,10 @@ case class TermEncode(msg_m : Term, key_m : Term) extends Term {
   }
 }
 
+
+//Dec(T,k)
 case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
-  
+  //Re-parse the string representing the term cypher_m
   def interprete(env : Map[String,String]) : String = {
     val u=cypher_m.interprete(env)
     if(u.startsWith("enc(")) { 
@@ -125,7 +142,10 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
 }
 
 
+
+//Pk(v)
 case class TermPublicKey(publicKey_m: Value) extends Term {
+  //Real key-generating code
   /*
   val publicKey_m={
     var seed=0
@@ -161,6 +181,7 @@ case class TermPublicKey(publicKey_m: Value) extends Term {
 }
 
 
+//Sk(v)
 case class TermSecretKey(privateKey_m: Value) extends Term {
 
   /*

@@ -9,6 +9,7 @@ import scala.collection.mutable.Map
 class Parser (strat : CalculationStrategy) {
 	val strategy : CalculationStrategy = strat;
 
+	//Environments for random constants & channels
 	var constEnvironment : Map[String,ValueConst] = Map();
 	var chanEnvironment : Map[String, Channel] = Map(); 
 
@@ -16,6 +17,8 @@ class Parser (strat : CalculationStrategy) {
 		constEnvironment = Map();
 	}
 
+
+	//Remove annoying parenthesis (without verification, checking is done before call)
 	def removeParenthesis(str : String) : String = {
 		if(str.startsWith("(") && str.endsWith(")")) {
 			return str.substring(1, str.length()-1);
@@ -26,6 +29,8 @@ class Parser (strat : CalculationStrategy) {
 		return str;
 	}
 
+
+	//Return the first occurence of 'find' in 'str' which is after -init unclosed '('
 	def parseStrPar(str : String, find : String, init : Int) : Int = {
 		var parenthesisCount = init;
 		var n = str.length();
@@ -42,6 +47,7 @@ class Parser (strat : CalculationStrategy) {
 		return -1;
 	}
 
+	//Find the associated 'else' of an 'if' statement
 	def findAssociatedElse(str : String) : Int = {
 		def aux (s : String, ifcount : Int, charcount : Int) : Int = {
 			if(s.startsWith("if"))
@@ -56,11 +62,26 @@ class Parser (strat : CalculationStrategy) {
 		aux(str, -1, 0)
 	}
 
+	//Remove annoying parenthesis from a proc (no check)
+	//Some tricky cases may happen when splitting the initial string
 	def removeProcParenthesis(str : String) : String = {
 		val i = parseStrPar(str, ")", -1);
-		return (str.substring(1, i) + str.substring(i+1));
+		val j = parseStrPar(str, ")", 0);
+
+		if (str.startsWith("(")) { 
+			if(i != -1)
+				return (str.substring(1, i) + str.substring(i+1));
+			else
+				return str.substring(1);
+		}
+		else if (j != -1) {
+			return (str.substring(0,j)+str.substring(j+1));
+		}
+		else //Should not happen
+			return str;
 	}
 
+	//Check if str represents a list (maybe a list of lists)
 	def isAList(str : String) : Boolean = {
 	    var parenthesisCount = 0; 
 	    var i = 0;
@@ -78,6 +99,7 @@ class Parser (strat : CalculationStrategy) {
 	    return i != (lim-1);
 	}
 
+	//Split a list (maybe a list of lists)
 	def splitList(str:String) : List[String] = {
 		var parenthesisCount = 0;
 		var list : List[String] = List();
@@ -99,7 +121,10 @@ class Parser (strat : CalculationStrategy) {
 		return list.reverse;
 	}
 
+
+	//Parse a value
 	def parseValue(str: String) : Value = {
+		//If the beginning parenthesis and the ending parenthesis are associated, we delete them
 		if (str.charAt(0) == '(' && parseStrPar(str, ")", -1) == str.length()-1) 
 			return parseValue(removeParenthesis(str));
 
@@ -144,6 +169,7 @@ class Parser (strat : CalculationStrategy) {
 				case _ => throw new parsingError("count() need a list or a variable parameter");
 			}
 		}
+		//Duplicate to enable count without parenthesis
 		else if(str.startsWith("count")) {
 			val list = parseTerm(str.substring(5));
 			list match {
@@ -152,7 +178,7 @@ class Parser (strat : CalculationStrategy) {
 				case _ => throw new parsingError("count() need a list or a variable parameter");
 			}
 		}
-		else {
+		else { //It's a const OR an arbitrary string
 			try {
 				return constEnvironment(str)
 			}
@@ -165,6 +191,7 @@ class Parser (strat : CalculationStrategy) {
 		}
 	}
 
+	//Construct a list of terms from the splitted string
 	def parseTermList(str : List[String]) : List[Term] = {
 		str match {
 			case Nil => throw new parsingError("List syntax error");
@@ -178,6 +205,7 @@ class Parser (strat : CalculationStrategy) {
 		}
 	}
 
+	//Parse terms
 	def parseTerm(str: String) : Term = {
 		if (str.startsWith("(")) {
 			return parseTerm(removeParenthesis(str));
@@ -233,7 +261,7 @@ class Parser (strat : CalculationStrategy) {
 				return new TermList(Nil);
 			}
 		}
-		else {
+		else { //It's a value OR a variable
 			try {
 				val value = parseValue(str);
 				return value;
@@ -244,8 +272,9 @@ class Parser (strat : CalculationStrategy) {
 		}
 	}
 
+	//Parse procs
 	def parseProc(str : String) : Proc = {
-		if (str.startsWith("(")) {
+		if (str.startsWith("(") || parseStrPar(str, ")", 0) != -1) {
 			return parseProc(removeProcParenthesis(str));
 		}
 
@@ -281,10 +310,12 @@ class Parser (strat : CalculationStrategy) {
 
 			val nextProc = parseProc(str.substring(procEnd+2));
 			try {
+				//Soit le channel est déjà défini
 				return new ProcInK(number, chanEnvironment(channelName), functionArg, functionRes, variable, nextProc);
 			}
 			catch {
 				case _ : Throwable => {
+					//Sinon il faut le créer
 					val channel = new Channel(channelName, strategy);
 					chanEnvironment.put(channelName, channel);
 					return new ProcInK(number, channel, functionArg, functionRes, variable, nextProc);
@@ -331,6 +362,7 @@ class Parser (strat : CalculationStrategy) {
 		}
 	}
 
+	//Parse the power of a proc (P^k)
 	def parseCopy(str : String) : (String, Int) = {
 		val power = str.lastIndexOf('^');
 		val res = str.substring(power+1);
@@ -342,6 +374,7 @@ class Parser (strat : CalculationStrategy) {
 		}
 	}
 
+	//Take a string and copies it 'copies' times
 	def copyProc(str : String, copies : Int) : List[String] = {
 		var res : List[String] = Nil;
 		for(i <- 1 to copies) {
@@ -350,13 +383,15 @@ class Parser (strat : CalculationStrategy) {
 		return res;
 	}
 
-	
+	//Parse a string, returning a list of procs
 	def parse(str : String) : List[Proc] = {
+		//Let's remove all the annoying characters, and split with ||
 		val strArray = str.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\t", "").split("""\|\|""");
 		def parseAux (lstr : List[String]) : List[Proc]  = {
 			resetConstEnvironment();
 			lstr match {
 				case List() => List()
+				//If p is copied, we parse each copy
 				case p::tail if p.matches(".*\\^[0-9]+") => {
 					val (p2, copies) = parseCopy(p);
 					parseAux(copyProc(p2,copies):::tail);
@@ -367,6 +402,7 @@ class Parser (strat : CalculationStrategy) {
 		parseAux(strArray.toList);
 	}
 
+	//Parse a file
 	def parseFile(path : String) : List[Proc] = {
 		return parse(scala.io.Source.fromFile(path).mkString);
 	}

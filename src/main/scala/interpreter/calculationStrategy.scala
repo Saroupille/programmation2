@@ -1,3 +1,9 @@
+/**
+* calculationStrategy - Definition of the two strategies
+* @author Lanvin Victor Thiré François
+* Copyright (c) 2014 GPLv3. See LICENCE file
+*/
+
 import scala.collection.mutable.SynchronizedQueue
 import scala.concurrent._
 import ExecutionContext.Implicits.global
@@ -17,35 +23,39 @@ class SynchroneousStrategy extends CalculationStrategy {
   }
 
   def write(sq:SynchronizedQueue[String], out:String, lockRead : Object, lockWrite : Object) = {
-    lockWrite.synchronized {
+    //We wait while a thread is already waiting to write in the channel
+    lockWrite.synchronized { 
       while(sq.length >= 1)
         lockWrite.wait()
     }
+    //We can now send the message, and wait for a recipient
     lockRead.synchronized {
       sq.enqueue(out);
-      lockRead.notify();
-      lockRead.wait()
+      lockRead.notify(); //Notify a recipient waiting to read
+      lockRead.wait() //And we wait for its response
     }
   }
 
   def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String = {
     var res = "";
     lockRead.synchronized {
-      while(sq.length == 0)
+      while(sq.length == 0) //We wait while no writer is available
         lockRead.wait();
-      res = sq.dequeue();
-      lockRead.notifyAll()
+      res = sq.dequeue();   //A message has been sent, get it and notify the sender
+      lockRead.notifyAll() 
     }
     lockWrite.synchronized {
-      lockWrite.notify();
+      lockWrite.notify();   //Notify a waiting writer that he can now write
       return res
     }
   }
 }
 
 class AsynchroneousStrategy extends CalculationStrategy {
+  //In fact, lockWrite is useless in this class
 
   def write(sq:SynchronizedQueue[String], out:String, lockRead : Object, lockWrite : Object) = {
+    //We just put our message and notify a reader
     lockRead.synchronized {
       sq.enqueue(out);
       lockRead.notify();
@@ -53,7 +63,8 @@ class AsynchroneousStrategy extends CalculationStrategy {
   }
 
   def read(sq:SynchronizedQueue[String], lockRead : Object, lockWrite : Object):String = {
-    lockRead.synchronized {
+    //We wait until a message is ready, and we get it
+    lockRead.synchronized { 
       while(sq.length == 0)
         lockRead.wait();
       return sq.dequeue()

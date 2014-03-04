@@ -1,6 +1,13 @@
+/**
+* interpreter.scala - threading of processes
+* @author Lanvin Victor Thiré François
+* Copyright (c) 2014 GPLv3. See LICENCE file
+*/
+
 import scala.collection.mutable.Map
 
 class Interpreter(synch : Boolean) {
+	//We define one strategy for all the channels
 	val strategy : CalculationStrategy = 
 		if (synch) 
 			new SynchroneousStrategy() 
@@ -24,8 +31,11 @@ class Interpreter(synch : Boolean) {
 			}
 		}
 
-		val ast = parser.parseFile(file);
+		//Parsing
+		val ast = parser.parseFile(file); 
+		//Threading
 		val procs = threading(ast);
+		//Interpretation
 		run(procs);
 	}
 }

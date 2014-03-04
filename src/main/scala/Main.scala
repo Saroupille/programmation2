@@ -1,7 +1,13 @@
+/**
+* Main.scala - Principal class, options parsing
+* @author Lanvin Victor Thiré François
+* Copyright (c) 2014 GPLv3. See LICENCE file
+*/
+
 import java.io.File
 
 
-//Class to parse the comand line
+//Class to parse the command line
 case class Config(
 debug: Boolean = false,
 file: String = "",
@@ -30,7 +36,7 @@ object StandardMain {
   }
 
   def start(config: Config) {  
-    if (config.debug) {
+    if (config.debug) {           // Launch some tests if the flag debug is used
       Test.interpretationTest();
       Test.parseTest();
     }
