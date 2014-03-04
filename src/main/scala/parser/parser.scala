@@ -42,6 +42,20 @@ class Parser (strat : CalculationStrategy) {
 		return -1;
 	}
 
+	def findAssociatedElse(str : String) : Int = {
+		def aux (s : String, ifcount : Int, charcount : Int) : Int = {
+			if(s.startsWith("if"))
+				aux(s.substring(2), ifcount+1, charcount + 2)
+			else if(s.startsWith("else") && ifcount > 0)
+				aux(s.substring(4), ifcount-1, charcount + 4)
+			else if(s.startsWith("else"))
+				return charcount
+			else 
+				aux(s.substring(1), ifcount, charcount+1)
+		}
+		aux(str, -1, 0)
+	}
+
 	def removeProcParenthesis(str : String) : String = {
 		val i = parseStrPar(str, ")", -1);
 		return (str.substring(1, i) + str.substring(i+1));
@@ -296,7 +310,7 @@ class Parser (strat : CalculationStrategy) {
 		}
 		else if (str.startsWith("if")) {
 			val thenPos = str.indexOf("then");
-			val elsePos = str.lastIndexOf("else");
+			val elsePos = findAssociatedElse(str);
 			val valueTest = parseValue(str.substring(2, thenPos));
 			val procThen = parseProc(str.substring(thenPos+4, elsePos)+".0");
 			val procElse = parseProc(str.substring(elsePos+4)+".0");
