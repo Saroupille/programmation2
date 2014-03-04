@@ -99,6 +99,12 @@ class Parser (strat : CalculationStrategy) {
 	    return i != (lim-1);
 	}
 
+	//Check to see if str may represent a value
+	def isAValue(str : String) : Boolean = {
+		(parseStrPar(str, ">", 0) != -1) || (parseStrPar(str, "=", 0) != -1) || 
+		(parseStrPar(str, "/\\", 0) != -1) || (parseStrPar(str, "\\/", 0) != -1)
+	}
+
 	//Split a list (maybe a list of lists)
 	def splitList(str:String) : List[String] = {
 		var parenthesisCount = 0;
@@ -209,6 +215,10 @@ class Parser (strat : CalculationStrategy) {
 	def parseTerm(str: String) : Term = {
 		if (str.startsWith("(")) {
 			return parseTerm(removeParenthesis(str));
+		}
+
+		if (isAValue(str)) {  //Check particular cases of > = /\ \/
+			return parseValue(str);
 		}
 
 		if (str.startsWith("pair(")) {
