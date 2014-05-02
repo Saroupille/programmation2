@@ -16,8 +16,15 @@ class RSA extends CryptoSystem {
   type PK = RSAPublicKey
   type SK = RSAPrivateKey
 
-  def generateKeys : (RSAPublicKey, RSAPrivateKey) = {
-    val gen=Random
+  
+  
+  def generateKeys(seed : Option[BigInt]) (RSAPublicKey, RSAPrivateKey) = {
+    val gen =
+    seed match {
+      case Some(seed) => Random(seed.longValue())
+      case None => Random()
+    }
+    //val gen=Random
     val p = BigInt.probablePrime(RSA.bytes, gen)
     val q = BigInt.probablePrime(RSA.bytes, gen)
     val n = p*q

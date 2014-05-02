@@ -14,7 +14,14 @@ class CryptoVigenere extends CryptoSystem {
 	type PK = VigenerePublicKey
 	type SK = VigenerePrivateKey
 
-	def generateKeys : (VigenerePublicKey, VigenerePrivateKey) = {
+	def generateKeys(seed : Option[BigInt]) : (VigenerePublicKey, VigenerePrivateKey) = {
+	  val gen =
+	    seed match {
+	      case Some(seed) => Random(seed.longValue())
+	      case None => Random()
+	    }
+    //val gen=Ran
+
 		def generateString (length : Int) : String = {
 			var chars = new Array[Char](length);
 			for (i <- 0 to length - 1) {

@@ -14,7 +14,14 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 	type PK = ElGamalPublicKey
 	type SK = ElGamalPrivateKey
 
-	def generateKeys : (ElGamalPublicKey, ElGamalPrivateKey) = {
+	def generateKeys(seed : Option[BigInt]) : (ElGamalPublicKey, ElGamalPrivateKey) = {
+	  val gen =
+	    seed match {
+	      case Some(seed) => Random(seed.longValue())
+	      case None => Random()
+	    }
+    //val gen=Ran
+
 		val randomInt = BigInt(1000, generator)%(group.order-1) + 1;
 		val expoElt = group.exp(group.generator, randomInt);
 		(new ElGamalPublicKey(expoElt), new ElGamalPrivateKey(randomInt));
