@@ -1,8 +1,8 @@
-class Elliptic (g:Field[El], eq:Array[El]) extends Group[BigInt] {
+/*class Elliptic (g:Field[El], eq:Array[El]) extends Group[BigInt] {
 
-  /*
+  
     Equation : y^2 + eq[0]*xy + eq[2]*y = x^3 + eq[1]*x^2 + eq[3]*x + eq[4]
-  */
+  
 
   abstract class Elt 
   case class Infinite extends Elt
@@ -33,3 +33,4 @@ class Elliptic (g:Field[El], eq:Array[El]) extends Group[BigInt] {
     return n % order
   }
 }
+ */

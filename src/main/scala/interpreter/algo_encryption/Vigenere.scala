@@ -1,3 +1,5 @@
+import scala.util.Random
+
 class CryptoVigenere extends CryptoSystem {
 	class VigenerePublicKey (init : String) extends PublicKey {
 		type T = String
@@ -17,8 +19,8 @@ class CryptoVigenere extends CryptoSystem {
 	def generateKeys(seed : Option[BigInt]) : (VigenerePublicKey, VigenerePrivateKey) = {
 	  val gen =
 	    seed match {
-	      case Some(seed) => Random(seed.longValue())
-	      case None => Random()
+	      case Some(seed) => new Random(seed.longValue())
+	      case None => new Random()
 	    }
     //val gen=Ran
 

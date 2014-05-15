@@ -1,3 +1,5 @@
+import scala.util.Random
+
 class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 	class ElGamalPublicKey (init : E) extends PublicKey {
 		type T = E
@@ -17,8 +19,8 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 	def generateKeys(seed : Option[BigInt]) : (ElGamalPublicKey, ElGamalPrivateKey) = {
 	  val gen =
 	    seed match {
-	      case Some(seed) => Random(seed.longValue())
-	      case None => Random()
+	      case Some(seed) => new Random(seed.longValue())
+	      case None => new Random()
 	    }
     //val gen=Ran
 

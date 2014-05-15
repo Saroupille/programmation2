@@ -18,12 +18,12 @@ class RSA extends CryptoSystem {
 
   
   
-  def generateKeys(seed : Option[BigInt]) (RSAPublicKey, RSAPrivateKey) = {
+  def generateKeys(seed : Option[BigInt]): (RSAPublicKey, RSAPrivateKey) = {
     val gen =
-    seed match {
-      case Some(seed) => Random(seed.longValue())
-      case None => Random()
-    }
+      seed match {
+        case Some(seed) => new Random(seed.longValue())
+        case None => new Random()
+      }
     //val gen=Random
     val p = BigInt.probablePrime(RSA.bytes, gen)
     val q = BigInt.probablePrime(RSA.bytes, gen)
@@ -50,7 +50,7 @@ class RSA extends CryptoSystem {
     var cypher=""
     for(i<-0 to nbchunks) {
       val bigIntText=BigInt.apply(bytesText.slice(chunk*i, chunk*(i+1)))
-        cypher+=new String(bigIntText.modPow(e,n).toByteArray, java.nio.charset.Charset.forName("ISO-8859-1"))
+      cypher+=new String(bigIntText.modPow(e,n).toByteArray, java.nio.charset.Charset.forName("ISO-8859-1"))
     }
     return cypher
   }
@@ -62,7 +62,7 @@ class RSA extends CryptoSystem {
     var decrypt=""
     val d = key.getKey._2
     val n = key.getKey._1
- 
+    
     for(i<-0 to nbchunks) {
       val bigIntText=BigInt.apply(bytesText.slice(chunk*i, chunk*(i+1)))
       decrypt+=new String(bigIntText.modPow(d,n).toByteArray)
@@ -71,6 +71,7 @@ class RSA extends CryptoSystem {
     return decrypt
   }
 }
+
 object RSA {
   val bytes=1024
 }
