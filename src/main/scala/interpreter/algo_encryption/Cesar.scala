@@ -11,5 +11,4 @@ class CryptoCesar extends CryptoVigenere {
 		(new VigenerePublicKey(randomChar.toString), new VigenerePrivateKey(randomChar.toString));
 	}
 
-
 }

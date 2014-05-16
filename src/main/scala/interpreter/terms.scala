@@ -166,11 +166,16 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
   }
    */
   def interprete(env : Map[String,String]) : String = { 
+    val u=cypher_m.interprete(env)
+    var msg=""
+    if(u.startsWith("enc(")) {
+      msg = u.substring(4,u.lastIndexOf(")"))
 
-
-
-      return "D("+Term.getCryptoSystem.decrypt(cypher_m.interprete(env), key_m.interprete(env))+")"
-
+    }
+    else {
+      throw new Exception("Wrong decode msg")
+    }
+    return "D("+Term.getCryptoSystem.decrypt(msg, key_m.interprete(env))+")"
   }
 }
 
