@@ -242,7 +242,7 @@ class Parser (strat : CalculationStrategy) {
 			val nextComma = parseStrPar(str, ",", -1);
 			val termEnd = str.lastIndexOf(')');
 			val leftTerm = parseTerm(str.substring(4, nextComma));
-			val restTerm = parseTerm(str.substring(nextComma+1, termEnd));
+			val restTerm = str.substring(nextComma+1, termEnd);
 			val nextComma2 = parseStrPar(restTerm, ",", 0);
 			val middleTerm = parseTerm(restTerm.substring(0, nextComma2));
 			val rightTerm = parseTerm(restTerm.substring(nextComma2+1));
