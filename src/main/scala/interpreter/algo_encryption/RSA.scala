@@ -70,6 +70,23 @@ class RSA extends CryptoSystem {
     
     return decrypt
   }
+  def publicKeyToString(pub:PK) : String = {
+    val (n,e) = pub.getKey
+    n+";"+e
+  }
+  def privateKeyToString(priv:SK) : String = {
+    val (n,d) = priv.getKey
+    n+";"+d
+  }
+  def publicKeyFromString(pub:String) : PK = {
+    val keys=pub.split(";").map(x=> x.toInt)
+    new RSAPublicKey(keys(0),keys(1))
+  }
+  def privateKeyFromString(priv:String) : SK = {
+    val keys=priv.split(";").map(x=> x.toInt)
+    new RSAPrivateKey(keys(0),keys(1))
+  }
+
 }
 
 object RSA {

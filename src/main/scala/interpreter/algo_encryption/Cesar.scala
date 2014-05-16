@@ -10,4 +10,6 @@ class CryptoCesar extends CryptoVigenere {
 	  val randomChar = generator.nextInt(256).toChar;
 		(new VigenerePublicKey(randomChar.toString), new VigenerePrivateKey(randomChar.toString));
 	}
+
+
 }

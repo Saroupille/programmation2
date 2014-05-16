@@ -27,11 +27,11 @@ class CryptoVigenere extends CryptoSystem {
 		def generateString (length : Int) : String = {
 			var chars = new Array[Char](length);
 			for (i <- 0 to length - 1) {
-				chars(i) = generator.nextInt(256).toChar;
+				chars(i) = gen.nextInt(256).toChar;
 			}
 			chars.mkString;
 		}
-		val randomString = generateString(generator.nextInt(5) + 5);
+		val randomString = generateString(gen.nextInt(5) + 5);
 		(new VigenerePublicKey(randomString), new VigenerePrivateKey(randomString));
 	}
 
@@ -60,4 +60,18 @@ class CryptoVigenere extends CryptoSystem {
 		}
 		charlist.reverse.mkString
 	}
+
+
+  override def publicKeyToString(pub:PK) : String = {
+    pub.getKey
+  }
+  override def privateKeyToString(priv:SK) : String = {
+    priv.getKey
+  }
+  override def publicKeyFromString(pub:String) : PK = {
+    new VigenerePublicKey(pub)
+  }
+  override def privateKeyFromString(priv:String) : SK = {
+    new VigenerePrivateKey(priv)
+  }
 }
