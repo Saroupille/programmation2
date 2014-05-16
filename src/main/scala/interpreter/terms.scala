@@ -130,7 +130,7 @@ case class TermEncode(msg_m : Term, key_m : Term) extends Term {
   def interprete(env : Map[String, String]) : String = {
     println("coucou\n");
     println(key_m.interprete(env))
-    Term.getCryptoSystem.encrypt(msg_m.interprete(env), key_m.interprete(env),0)
+    return "enc("+Term.getCryptoSystem.encrypt(msg_m.interprete(env), key_m.interprete(env),0)+")"
   }
 }
 
@@ -169,7 +169,7 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
 
 
 
-      Term.getCryptoSystem.decrypt(cypher_m.interprete(env), key_m.interprete(env))
+      return "D("+Term.getCryptoSystem.decrypt(cypher_m.interprete(env), key_m.interprete(env))+")"
 
   }
 }
