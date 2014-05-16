@@ -35,11 +35,11 @@ object StandardMain {
       arg[Int]("keysize") optional() action { (x,c) =>
         c.copy(keysize=x) } text("Size of the key if the algorithm is RSA (default 1024)") 
       arg[Unit]("zpadd") optional() action { (x,c) =>
-        c.copy(zpadd=true,zpmul=false) } text("Use el gama with (Z,+). Give a prime number") 
+        c.copy(zpadd=true,zpmul=false,ec=false) } text("Use el gama with (Z,+). Give a prime number") 
       arg[Unit]("zpmul") optional() action { (x,c) =>
-        c.copy(zpmul=true) } text("Use el gama with (Z,x). Give a prime number (default)") 
+        c.copy(zpmul=true,zpadd=false,ec=false) } text("Use el gama with (Z,x). Give a prime number (default)") 
       opt[Unit]("ec") optional() action { (x,c) =>
-        c.copy(ec=true) } text("Use el gamal with elliptic curves") 
+        c.copy(ec=true,zpadd=false,zpmul=false) } text("Use el gamal with elliptic curves") 
       opt[Unit]("RSA") optional() action { (x,c) =>
         c.copy(enc_algo="RSA") } text("Use RSA algorithm")
       opt[Unit]("Vigenere") optional() action { (x,c) =>
