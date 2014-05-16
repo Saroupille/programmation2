@@ -24,13 +24,14 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 	    }
     //val gen=Ran
 
-		val randomInt = BigInt(1000, generator)%(group.order-1) + 1;
+		val randomInt = BigInt(1000, gen)%(group.order-1) + 1;
 		val expoElt = group.exp(group.generator, randomInt);
 		(new ElGamalPublicKey(expoElt), new ElGamalPrivateKey(randomInt));
 	}
 
 	def encrypt(msg:String, pub:PK, rdm:Int): String = {
-		val randomInt = BigInt(1000, generator)%(group.order-1) + 1;
+		val gen = new Random(rdm);
+		val randomInt = BigInt(1000, gen)%(group.order-1) + 1;
 		val expoElt = group.exp(group.generator, randomInt);
 		val sharedSecret = group.exp(pub.getKey, randomInt);
 		def injectString : E = {
