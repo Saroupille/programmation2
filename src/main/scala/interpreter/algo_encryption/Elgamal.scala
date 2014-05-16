@@ -68,4 +68,20 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
  		}
  		return decryptString	
 	}
+
+	def publicKeyToString(pub:PK) : String = {
+		group.toString(pub.getKey)
+	}
+
+  	def privateKeyToString(priv:SK) : String = {
+  		group.toString(group.fromBigInt(priv.getKey))
+  	}
+
+  	def publicKeyFromString(pub:String) : PK = {
+  		new ElGamalPublicKey (group.fromString(pub))
+  	}
+
+  	def privateKeyFromString(priv:String) : SK = {
+  		new ElGamalPrivateKey (group.toBigInt(group.fromString(priv)))
+  	}
 }

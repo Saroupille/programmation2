@@ -16,8 +16,6 @@ trait CryptoSystem {
   val generator = new Random ();
   def encrypt(msg:String, pub:PK, rdm:Int): String
   def decrypt(msg:String, priv:SK): String
-  //def encrypt(msg:String, pub:String, rdm:Int): String
-  //def decrypt(msg:String, priv:String) : String
 
   def encrypt(msg:String, pub:String, rdm:Int): String = {
     encrypt(msg, publicKeyFromString(pub),rdm)
