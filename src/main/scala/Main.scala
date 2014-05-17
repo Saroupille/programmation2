@@ -6,6 +6,8 @@
 
 import java.io.File
 
+case class configError(s: String) extends Exception(s)
+
 
 //Class to parse the command line
 case class Config(
@@ -16,12 +18,14 @@ enc_algo: String ="",
 keysize: Int = 1024,
 zpadd: Boolean = false,
 zpmul: Boolean = true,
-ec: Boolean = false
+ec: Boolean = false,
+prime: BigInt = BigInt("531872289054204184185084734375133399408303613982130856645299464930952178606045848877129147820387996428175564228204785846141207532462936339834139412401975338705794646595487324365194792822189473092273993580587964571659678084484152603881094176995594813302284232006001752128168901293560051833646881436219")
 )
 
 
 object StandardMain {
   def main(args: Array[String]) {
+
     val parser = new scopt.OptionParser[Config]("CryptIt") {
       head("CryptIt", "3.14159")
       opt[Unit]('d', "debug") action {(_,c) =>
@@ -35,9 +39,9 @@ object StandardMain {
       arg[Int]("keysize") optional() action { (x,c) =>
         c.copy(keysize=x) } text("Size of the key if the algorithm is RSA (default 1024)") 
       arg[Unit]("zpadd") optional() action { (x,c) =>
-        c.copy(zpadd=true,zpmul=false,ec=false) } text("Use el gama with (Z,+). Give a prime number") 
+        c.copy(zpadd=true,zpmul=false,ec=false) } text("Use el gamal with (Z,+). Give a prime number") 
       arg[Unit]("zpmul") optional() action { (x,c) =>
-        c.copy(zpmul=true,zpadd=false,ec=false) } text("Use el gama with (Z,x). Give a prime number (default)") 
+        c.copy(zpmul=true,zpadd=false,ec=false) } text("Use el gamal with (Z,x). Give a prime number (default)") 
       opt[Unit]("ec") optional() action { (x,c) =>
         c.copy(ec=true,zpadd=false,zpmul=false) } text("Use el gamal with elliptic curves") 
       opt[Unit]("RSA") optional() action { (x,c) =>
@@ -63,7 +67,26 @@ object StandardMain {
       Test.interpretationTest();
       Test.parseTest();
     }
-    val interpreter = new Interpreter(config.synch);
+
+    val cs : CryptoSystem = 
+      if (config.enc_algo == "RSA") 
+        new RSA 
+      else if (config.enc_algo == "Cesar")
+        new CryptoCesar
+      else if (config.enc_algo == "Vigenere")
+        new CryptoVigenere
+      else if (config.enc_algo == "Elgamal") {
+        if (config.zpadd)
+          new CryptoElGamal(new Zadd(config.prime))
+        else if (config.zpmul)
+          new CryptoElGamal(new Zmult(config.prime))
+        else 
+          throw configError("Unknown group")
+      }
+      else 
+        throw configError("Unknown cryptosystem");
+
+    val interpreter = new Interpreter(config.synch, cs);
     println(config.file);
     interpreter.interprete(config.file)
   }

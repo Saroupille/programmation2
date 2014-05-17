@@ -6,7 +6,10 @@
 
 import scala.collection.mutable.Map
 
-class Interpreter(synch : Boolean) {
+class Interpreter(synch : Boolean, crypt : CryptoSystem) {
+	//Bind the cryptosystem
+	Term.setCryptoSystem(crypt);
+
 	//We define one strategy for all the channels
 	val strategy : CalculationStrategy = 
 		if (synch) 

@@ -128,8 +128,6 @@ case class TermEncode(msg_m : Term, key_m : Term, rdm : Term) extends Term {
   }
    */
   def interprete(env : Map[String, String]) : String = {
-    println("coucou\n");
-    println(key_m.interprete(env))
     //TO DO Some exceptions to raise
     return "enc("+Term.getCryptoSystem.encrypt(msg_m.interprete(env), key_m.interprete(env),rdm.interprete(env).toInt)+")"
   }
