@@ -79,11 +79,11 @@ class RSA extends CryptoSystem {
     n+";"+d
   }
   def publicKeyFromString(pub:String) : PK = {
-    val keys=pub.split(";").map(x=> x.toInt)
+    val keys=pub.split(";").map(x=> BigInt(x))
     new RSAPublicKey(keys(0),keys(1))
   }
   def privateKeyFromString(priv:String) : SK = {
-    val keys=priv.split(";").map(x=> x.toInt)
+    val keys=priv.split(";").map(x=> BigInt(x))
     new RSAPrivateKey(keys(0),keys(1))
   }
 
