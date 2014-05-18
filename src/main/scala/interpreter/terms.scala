@@ -181,7 +181,7 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
 
 
 //Pk(v)
-case class TermPublicKey(publicKey_m: Value) extends Term {
+case class TermPublicKey(seed_s: Value) extends Term {
   //Real key-generating code
   /*
    val publicKey_m={
@@ -216,13 +216,16 @@ case class TermPublicKey(publicKey_m: Value) extends Term {
     return "err"
   }*/
   def interprete(env : Map[String, String]) : String = {
-      publicKey_m.interprete(env)   
+    val cs = Term.getCryptoSystem()
+    val seed =BigInt.apply(seed_s.interprete(env))
+    cs.publicKeyToString(cs.generateKeys(Some(seed))._1)
+
   }
 }
 
 
 //Sk(v)
-case class TermSecretKey(privateKey_m: Value) extends Term {
+case class TermSecretKey(seed_s: Value) extends Term {
 
   /*
    val privateKey_m={ //See TermPublicKey
@@ -257,7 +260,9 @@ case class TermSecretKey(privateKey_m: Value) extends Term {
    */
 
   def interprete(env : Map[String,String]) : String = {
-    privateKey_m.interprete(env)
+    val cs = Term.getCryptoSystem()
+    val seed =BigInt.apply(seed_s.interprete(env))
+    cs.privateKeyToString(cs.generateKeys(Some(seed))._2)
   }
 }
 
