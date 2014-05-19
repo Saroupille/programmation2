@@ -248,6 +248,11 @@ class Parser (strat : CalculationStrategy) {
 			val rightTerm = parseTerm(restTerm.substring(nextComma2+1));
 			return new TermEncode(leftTerm, middleTerm, rightTerm);
 		}
+		else if (str.startsWith("openEnc(")) {
+			val termEnd = str.lastIndexOf(')');
+			val mainTerm = parseTerm(str.substring(8, termEnd));
+			return new TermOpenEncode(mainTerm);
+		}
 		else if (str.startsWith("dec(")) {
 			val nextComma = parseStrPar(str, ",", -1);
 			val termEnd = str.lastIndexOf(')');

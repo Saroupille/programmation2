@@ -1,2 +1,1 @@
-new a.out(c, enc(coucou, pk(1), 5)) ||
-in(c,x).out(stdout,dec(x,sk(1)))
+out(stdout, openEnc(enc("CecI Est UnE PhrAse de tEsT Juste PouR Voir #@2210.", pk(5), 1)))

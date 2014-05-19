@@ -122,11 +122,6 @@ case class TermProj2(term_m : Term) extends Term {
 
 //Enc(m,k)
 case class TermEncode(msg_m : Term, key_m : Term, rdm : Term) extends Term {
-  /*
-  def interprete(env : Map[String,String]) : String = {
-    return "enc("+msg_m.interprete(env)+","+key_m.interprete(env)+")"
-  }
-   */
   def interprete(env : Map[String, String]) : String = {
     //TO DO Some exceptions to raise
     return "enc("+Term.getCryptoSystem.encrypt(msg_m.interprete(env), key_m.interprete(env),rdm.interprete(env).toInt)+")"
@@ -136,34 +131,6 @@ case class TermEncode(msg_m : Term, key_m : Term, rdm : Term) extends Term {
 
 //Dec(T,k)
 case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
-  /*
-  //Re-parse the string representing the term cypher_m
-  def interprete(env : Map[String,String]) : String = {
-    val u=cypher_m.interprete(env)
-    if(u.startsWith("enc(")) {
-      val u1=u.substring(4,Term.parseStrPar(u, ",", -1))
-      val pk=u.substring(Term.parseStrPar(u, ",", -1)+1,u.lastIndexOf(")"))
-      val sk=key_m.interprete(env)
-      if(pk.startsWith("pk(")) {
-        val n = pk.substring(3,pk.lastIndexOf(")"))
-        if(sk.startsWith("sk(")) {
-          val n2 = sk.substring(3,sk.lastIndexOf(")"))
-          try {
-            n.toInt
-          } catch {
-            case e:Exception=>{
-              return "err"
-            }
-          }
-
-          if(n==n2)
-            return u1
-        }
-      }
-    }
-    return "err"
-  }
-   */
   def interprete(env : Map[String,String]) : String = { 
     val u=cypher_m.interprete(env)
     var msg=""
@@ -182,39 +149,6 @@ case class TermDecode(cypher_m: Term, key_m : Term) extends Term {
 
 //Pk(v)
 case class TermPublicKey(seed_s: Value) extends Term {
-  //Real key-generating code
-  /*
-   val publicKey_m={
-   var seed=0
-   v match {
-   case ValueInteger(n) => seed=n
-   case _ => throw new noIntegerPublicKey("bouh")
-   }
-   val keyGenerator = KeyPairGenerator.getInstance("RSA");
-   /*with SHA1PRNG, generation of keys is deterministic.
-   It is not secured.*/
-   val secureSeed=SecureRandom.getInstance("SHA1PRNG");
-   secureSeed.setSeed(seed);
-   keyGenerator.initialize(2048,secureSeed);
-   val keyPair = keyGenerator.generateKeyPair();
-   keyPair.getPublic();
-   }
-
-   def execute() : java.security.PublicKey = {
-   return publicKey_m
-   }
-   */
-  /*
-  def interprete(env : Map[String,String]) : String = {
-    try {
-      return "pk("+publicKey_m.interprete(env)+")"
-    } catch {
-      case e:Exception=>{
-        return "err"
-      }
-    }
-    return "err"
-  }*/
   def interprete(env : Map[String, String]) : String = {
     val cs = Term.getCryptoSystem()
     val seed =BigInt.apply(seed_s.interprete(env))
@@ -226,39 +160,6 @@ case class TermPublicKey(seed_s: Value) extends Term {
 
 //Sk(v)
 case class TermSecretKey(seed_s: Value) extends Term {
-
-  /*
-   val privateKey_m={ //See TermPublicKey
-   var seed=0
-   v match {
-   case ValueInteger(n) => seed=n
-   case _ => throw new noIntegerSecretKey("bouh")
-   }
-   val keyGenerator = KeyPairGenerator.getInstance("RSA");
-   val secureSeed=SecureRandom.getInstance("SHA1PRNG");
-   secureSeed.setSeed(seed);
-   keyGenerator.initialize(2048,secureSeed);
-   val keyPair = keyGenerator.generateKeyPair();
-   keyPair.getPrivate();
-   }
-
-   def execute() : java.security.PrivateKey = {
-   return privateKey_m
-   }
-   */
-  /*
-  def interprete(env : Map[String,String]) : String = {
-    try {
-      return "sk("+privateKey_m.interprete(env).toInt+")"
-    } catch {
-      case e:Exception=>{
-        return "err"
-      }
-    }
-    return "err"
-  }
-   */
-
   def interprete(env : Map[String,String]) : String = {
     val cs = Term.getCryptoSystem()
     val seed =BigInt.apply(seed_s.interprete(env))

@@ -90,5 +90,9 @@ class RSA extends CryptoSystem {
 }
 
 object RSA {
-  val bytes=1024
+  var bytes=1024
+
+  def setBytes(b : Int) : Unit = {
+    RSA.bytes = b
+  }
 }

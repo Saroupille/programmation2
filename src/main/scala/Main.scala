@@ -50,7 +50,7 @@ object StandardMain {
         c.copy(enc_algo="Vigenere") } text("Use vigenere algorithm")
       opt[Unit]("Cesar") optional() action { (x,c) =>
         c.copy(enc_algo="Cesar") } text("Use cesar algorithm")
-      opt[Unit]("Elgamal") optional() action { (x,c) =>
+      opt[Unit]("elGamal") optional() action { (x,c) =>
         c.copy(enc_algo="Elgamal") } text("Use el gamal algorithm")
       help("help") text("prints this usage text")
       checkConfig { c => 
@@ -67,6 +67,8 @@ object StandardMain {
       Test.interpretationTest();
       Test.parseTest();
     }
+
+    RSA.setBytes(config.keysize);
 
     val cs : CryptoSystem = 
       if (config.enc_algo == "RSA") 
