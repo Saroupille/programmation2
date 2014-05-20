@@ -1,1 +1,1 @@
-out(stdout, openEnc(enc("CecI Est UnE PhrAse de tEsT Juste PouR Voir #@2210.", pk(5), 1)))
+out(stdout, dec(enc(coucou, pk(5), 3),sk(5)))

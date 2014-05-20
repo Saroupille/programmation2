@@ -36,12 +36,16 @@ object StandardMain {
         c.copy(synch = true) }
       arg[String]("<file>") required() action { (x, c) =>
         c.copy(file = x) } text("File to be interpreted")
-      arg[Int]("keysize") optional() action { (x,c) =>
+      opt[Int]("keysize") optional() action { (x,c) =>
         c.copy(keysize=x) } text("Size of the key if the algorithm is RSA (default 1024)") 
-      arg[Unit]("zpadd") optional() action { (x,c) =>
-        c.copy(zpadd=true,zpmul=false,ec=false) } text("Use el gamal with (Z,+). Give a prime number") 
-      arg[Unit]("zpmul") optional() action { (x,c) =>
-        c.copy(zpmul=true,zpadd=false,ec=false) } text("Use el gamal with (Z,x). Give a prime number (default)") 
+      opt[BigInt]("zpadd") optional() action { (x,c) =>
+        if (!x.isProbablePrime(5))
+          throw configError("\nThis is not a prime number !");
+        c.copy(prime=x, zpadd=true,zpmul=false,ec=false) } text("Use el gamal with (Z,+). Take a prime number as parameter.") 
+      opt[BigInt]("zpmul") optional() action { (x,c) =>
+        if (!x.isProbablePrime(5))
+          throw configError("\nThis is not a prime number !");
+        c.copy(prime=x, zpmul=true,zpadd=false,ec=false) } text("Use el gamal with (Z,x). Take a prime number as parameter.") 
       opt[Unit]("ec") optional() action { (x,c) =>
         c.copy(ec=true,zpadd=false,zpmul=false) } text("Use el gamal with elliptic curves") 
       opt[Unit]("RSA") optional() action { (x,c) =>
