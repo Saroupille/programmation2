@@ -135,18 +135,31 @@ case class TermOpenEncode(mainTerm : Term) extends Term {
       vigenere.decrypt(cipher,key_found)
     }
 
+    def decryptElGamal(cipher: String) : String = {
+      val key = BigInt(cipher.substring(cipher.lastIndexOf("#")+1, cipher.lastIndexOf(";")));
+      val ord = cipher.substring(cipher.lastIndexOf(";")+1);
+      val group = new Zadd(BigInt(ord));
+      var discretelog = BigInt(1);
+      var pow = group.generator;
+      while(pow != key) {
+        discretelog = discretelog + 1;
+        pow = group.combines(pow, group.generator);
+      }
+      val elgamal = new CryptoElGamal(group);
+      elgamal.decrypt(cipher, pow.toString);
+    }
+
   def interprete(env : Map[String,String]) : String = {
     val strDec = mainTerm.interprete(env);
     var msg=""
-    if(strDec.startsWith("enc(")) {
-      msg = strDec.substring(4,strDec.lastIndexOf(")"))
-
-    }
+    if(strDec.startsWith("enc("))
+      msg = strDec.substring(4,strDec.lastIndexOf(")"));
     Term.cs match {
       case Some(csys) => {
         csys match {
           case _ : CryptoCesar => decryptCesar(msg)._1
           case _ : CryptoVigenere => decryptVigenere(msg)
+          case _ : CryptoElGamal[_] => decryptElGamal(msg)
           case _ => strDec
         }
       }

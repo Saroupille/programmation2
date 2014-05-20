@@ -43,16 +43,13 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 		}
 		val cryptedMsg = group.combines(injectString, sharedSecret);
 
-		return (group.toString(expoElt) + "#" + group.toString(cryptedMsg))
+		return (group.toString(expoElt) + "#" + group.toString(cryptedMsg) + "#" + publicKeyToString(pub))
 	}
 
  	def decrypt(msg:String, priv:SK): String = {
  		def cutString : (E,E) = {
- 			var i = 0;
- 			while (msg(i) != '#') {
- 				i = i+1;
- 			}
- 			(group.fromString (msg.substring(0, i)), group.fromString (msg.substring(i+1)))
+ 			val i = msg.indexOf("#");
+ 			(group.fromString (msg.substring(0, i)), group.fromString (msg.substring(i+1, msg.lastIndexOf("#"))))
  		}
  		val (e1, e2) = cutString;
  		val sharedSecret = group.exp(e1, group.order - priv.getKey);
@@ -71,7 +68,7 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
 	}
 
 	def publicKeyToString(pub:PK) : String = {
-		group.toString(pub.getKey)
+		group.toString(pub.getKey) + ";" + group.order.toString
 	}
 
   	def privateKeyToString(priv:SK) : String = {
@@ -79,7 +76,7 @@ class CryptoElGamal[E] (group : Group[E]) extends CryptoSystem {
   	}
 
   	def publicKeyFromString(pub:String) : PK = {
-  		new ElGamalPublicKey (group.fromString(pub))
+  		new ElGamalPublicKey (group.fromString(pub.substring(0, pub.lastIndexOf(";"))))
   	}
 
   	def privateKeyFromString(priv:String) : SK = {
